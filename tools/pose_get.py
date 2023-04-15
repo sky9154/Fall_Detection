@@ -10,14 +10,12 @@ mp_drawing = solutions.drawing_utils
 mp_drawing_styles = solutions.drawing_styles
 mp_pose = solutions.pose
 
-DATASET = input('DATASET: ')
-IMAGE_FILES = os.listdir(DATASET)
+folder = input('DATASET: ')
+
 WIDTH = 640
 HEIGHT = 480
 XC = WIDTH / 2
 YC = HEIGHT / 2
-CSV_PATH = os.path.join(os.path.abspath(os.path.join(DATASET, '..')), f'{os.path.basename(DATASET)}.csv')
-
 
 def extract_keypoints (results):
   '''
@@ -109,41 +107,51 @@ def create_csv ():
     ]))
 
 
-os.chdir(DATASET)
-create_csv()
+for data in ['LEFT_BOTTOM', 'LEFT_TOP', 'RIGHT_BOTTOM', 'RIGHT_TOP', 'ROTATE_45', 'ROTATE_135', 'ROTATE_225', 'ROTATE_315']:
+  DATASET = os.path.join(folder, data)
+  IMAGE_FILES = os.listdir(DATASET)
+  CSV_PATH = os.path.join(os.path.abspath(os.path.join(DATASET, '..')), f'{os.path.basename(DATASET)}.csv')
+  os.chdir(DATASET)
+  create_csv()
 
-with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as pose:
-  for index, file in enumerate(IMAGE_FILES, start=1):
-    frame = cv2.imread(file)
+  with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as pose:
+    for index, file in enumerate(IMAGE_FILES, start=1):
+      frame = cv2.imread(file)
 
-    frame.flags.writeable = False
-    results = pose.process(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
-    frame.flags.writeable = True
+      frame.flags.writeable = False
+      results = pose.process(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+      frame.flags.writeable = True
 
-    if results.pose_landmarks:
-      keypoints = extract_keypoints(results)
-      keypoints = dis_keypoints(keypoints)
-    else:
-      np.zeros(26)
+      if results.pose_landmarks:
+        keypoints = extract_keypoints(results)
+        # keypoints = dis_keypoints(keypoints)
+      else:
+        keypoints = np.zeros(26)
 
-    with open(os.path.join(os.path.abspath(os.path.join(DATASET, '..')), 'labels_3.csv')) as csv:
-      reader = DictReader(csv)
+      with open(os.path.join(os.path.abspath(os.path.join(DATASET, '..')), 'labels.csv')) as csv:
+        reader = DictReader(csv)
 
-      for row in reader:
-        if row['frame'] == str(index):
-          with open(CSV_PATH, 'a+', newline='') as csv:
-            write = writer(csv)
-            
-            write.writerow(np.concatenate([
-              [
-                file.split('.')[0], 
-                1 if (int(row['frame']) <= 8000 and row['labels'] == '1') or (int(row['frame']) > 8000 and row['labels'] == '3') else 0
-              ],
-                keypoints
-              ]
-            ))
+        for row in reader:
+          if row['frame'] == str(index):
+            with open(CSV_PATH, 'a+', newline='') as csv:
+              write = writer(csv)
+              
+              write.writerow(np.concatenate([
+                [
+                  file.split('.')[0], 
+                  1 
+                  if (int(row['frame']) <= 8000 and row['labels'] == '1') 
+                  or (int(row['frame']) > 8000 and (row['labels'] == '3'))
+                  else 
+                  0
+                ],
+                  keypoints
+                ]
+              ))
 
-          break
+            break
+      
+      sys.stdout.write(f'\rLOADING:    {str(round(index / len(IMAGE_FILES) * 100, 1)).zfill(2)}%')
+      sys.stdout.flush()
     
-    sys.stdout.write(f'\rLOADING:    {str(round(index / len(IMAGE_FILES) * 100, 1)).zfill(2)}%')
-    sys.stdout.flush()
+    print()
