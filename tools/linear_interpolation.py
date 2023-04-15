@@ -32,7 +32,7 @@ def linear_interpolation (csv_file):
     sys.stdout.write(f'\rLOADING:    {str(round(i / len(df) * 100, 1)).zfill(2)}%')
     sys.stdout.flush()
 
-  df.to_csv('rt.csv', index=False)
+  df.to_csv('linear_interpolation.csv', index=False)
 
 
 if __name__ == '__main__':
