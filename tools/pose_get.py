@@ -27,63 +27,12 @@ def extract_keypoints (results):
 
   landmarks = results.pose_landmarks.landmark
 
-  nose_value = landmarks[mp_pose.PoseLandmark.NOSE.value]
-  
-  left_shoulder_value = landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value]
-  right_shoulder_value = landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value]
-  
-  left_elbow_value = landmarks[mp_pose.PoseLandmark.LEFT_ELBOW.value]
-  right_elbow_value = landmarks[mp_pose.PoseLandmark.RIGHT_ELBOW.value]
-  
-  left_wrist_value = landmarks[mp_pose.PoseLandmark.LEFT_WRIST.value]
-  right_wrist_value = landmarks[mp_pose.PoseLandmark.RIGHT_WRIST.value]
-  
-  left_hip_value = landmarks[mp_pose.PoseLandmark.LEFT_HIP.value]
-  right_hip_value = landmarks[mp_pose.PoseLandmark.RIGHT_HIP.value]
+  keypoints = [landmarks[i] for i in [0] + list(range(11, 17)) + list(range(23, 29))]
 
-  left_knee_value = landmarks[mp_pose.PoseLandmark.LEFT_KNEE.value]
-  right_knee_value = landmarks[mp_pose.PoseLandmark.RIGHT_KNEE.value]
+  pose_x = [(1 - keypoint.x) * WIDTH for keypoint in keypoints]
+  pose_y = [(1 - keypoint.y) * HEIGHT for keypoint in keypoints]
 
-  left_ankle_value = landmarks[mp_pose.PoseLandmark.LEFT_ANKLE.value]
-  right_ankle_value = landmarks[mp_pose.PoseLandmark.RIGHT_ANKLE.value]
-
-  origin_pose_x = [
-    (1 - x) * WIDTH for x in [
-      nose_value.x,
-      left_shoulder_value.x,
-      right_shoulder_value.x,
-      left_elbow_value.x,
-      right_elbow_value.x,
-      left_wrist_value.x,
-      right_wrist_value.x,
-      left_hip_value.x,
-      right_hip_value.x,
-      left_knee_value.x,
-      right_knee_value.x,
-      left_ankle_value.x,
-      right_ankle_value.x
-    ]
-  ]
-
-  origin_pose_y = [
-    (1 - y) * HEIGHT for y in [
-      nose_value.y,
-      left_shoulder_value.y,
-      right_shoulder_value.y,
-      left_elbow_value.y,
-      right_elbow_value.y,
-      left_wrist_value.y,
-      right_wrist_value.y,
-      left_hip_value.y,
-      right_hip_value.y,
-      left_knee_value.y,
-      right_knee_value.y,
-      left_ankle_value.y,
-      right_ankle_value.y
-    ]
-  ]
-  
-  return np.concatenate([origin_pose_x, origin_pose_y])
+  return np.concatenate([pose_x, pose_y])
 
 
 def dis_keypoints (keypoints):
