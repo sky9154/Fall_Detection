@@ -1,0 +1,23 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&family=Roboto:wght@400;700&display=swap');
+
+
+* {
+  margin: 0;
+  padding: 0;
+}
+
+*,
+html,
+body {
+  font-family: 'Noto Sans TC', 'Roboto', sans-serif;
+}
+
+html,
+#root {
+  height: 100%;
+}
+
+input[type='password']::-ms-reveal,
+input[type='password']::-webkit-reveal {
+  display: none;
+}
