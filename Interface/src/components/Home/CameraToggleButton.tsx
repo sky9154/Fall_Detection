@@ -4,7 +4,7 @@ import {
   IoImageOutline,
   IoPhonePortraitOutline,
   IoAccessibilityOutline,
-  IoEllipsisHorizontalOutline,
+  IoCameraOutline,
   IoAccessibility
 } from 'react-icons/io5';
 import Divider from '@mui/material/Divider';
@@ -98,8 +98,8 @@ const CameraToggleButton: FC = () => {
         <ToggleButton value="1" aria-label="1">
           <IoPhonePortraitOutline />
         </ToggleButton>
-        <ToggleButton value="esp32" aria-label="esp32" disabled>
-          <IoEllipsisHorizontalOutline />
+        <ToggleButton value="esp32" aria-label="esp32">
+          <IoCameraOutline />
         </ToggleButton>
       </StyledToggleButtonGroup>
     </Paper>

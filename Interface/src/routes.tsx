@@ -13,7 +13,6 @@ const loadable = (Component: LazyExoticComponent<FC>) => (props: any) => (
 
 const Home = loadable(lazy(() => import('pages/Home')));
 const Login = loadable(lazy(() => import('pages/Authentication/Login')));
-const Info = loadable(lazy(() => import('pages/Info')));
 const Account = loadable(lazy(() => import('pages/Account')));
 const System = loadable(lazy(() => import('pages/System')));
 const Error = loadable(lazy(() => import('pages/404')));
@@ -40,13 +39,6 @@ const routes = [
           <Home />
         </HomeProvider>
       </GuestGuard >
-    )
-  }, {
-    path: '/info',
-    element: (
-      <GuestGuard>
-        <Info />
-      </GuestGuard>
     )
   }, {
     path: '/account',

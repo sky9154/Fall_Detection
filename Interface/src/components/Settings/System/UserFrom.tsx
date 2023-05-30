@@ -1,4 +1,4 @@
-import { FC, FormEvent } from 'react';
+import { FC, FormEvent, ChangeEvent, useState } from 'react';
 import Autocomplete from '@mui/material/Autocomplete';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -40,10 +40,11 @@ export const Added: FC<UserFromProps> = ({ open, handleClose }) => {
         check.username(createUser.username) &&
         check.password(createUser.password) &&
         check.name(createUser.name)
-      )
+      ) {
         await user.create(createUser);
 
         handleClose();
+      }
     };
   }
 
@@ -124,34 +125,55 @@ export const Added: FC<UserFromProps> = ({ open, handleClose }) => {
 }
 
 export const Edit: FC<UserFromProps> = ({ open, handleClose, users }) => {
+  const [username, setUsername] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
+  const [name, setName] = useState<string>('');
+  const [role, setRole] = useState<string>('user');
+
+  const handleUsername = async (event: any, inputUsername: string) => {
+    if (inputUsername) {
+      await user.getUser(inputUsername, {
+        password: setPassword,
+        name: setName,
+        role: setRole
+      });
+
+      setUsername(inputUsername);
+    }
+  }
+
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    const data = new FormData(event.currentTarget);
-    const username = data.get('username');
-    const password = data.get('password');
-    const name = data.get('name');
-    const role = data.get('role');
-
     if (username && password && name && role) {
-      const createUser = {
-        username: username as string,
-        password: password as string,
-        name: name as string,
-        role: role as string
+      const editUser = {
+        username: username,
+        password: password,
+        name: name,
+        role: role
       }
 
       if (
-        check.username(createUser.username) &&
-        check.password(createUser.password) &&
-        check.name(createUser.name)
-      )
-        await user.edit(createUser);
+        check.username(editUser.username) &&
+        check.password(editUser.password) &&
+        check.name(editUser.name)
+      ) {
+        await user.edit(editUser);
+        
+        handleClose();
+      }
     };
   }
 
   return (
-    <Dialog open={open} onClose={handleClose}>
+    <Dialog open={open} onClose={() => {
+      handleClose();
+
+      setUsername('');
+      setPassword('');
+      setName('');
+      setRole('user');
+    }}>
       <Box
         component="form"
         display="flex"
@@ -175,21 +197,41 @@ export const Edit: FC<UserFromProps> = ({ open, handleClose, users }) => {
             noOptionsText="沒有此成員"
             disableClearable
             fullWidth
-            renderInput={(params) => <TextField {...params} label="帳號" />}
+            inputValue={username}
+            onInputChange={handleUsername}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                name="name"
+                label="帳號"
+              />
+            )}
           />
           <TextField
             id="password"
             name="password"
             label="密碼"
             fullWidth
+            value={password}
             variant="outlined"
+            onChange={
+              (event: ChangeEvent<HTMLInputElement>) => {
+                setPassword(event.target.value);
+              }
+            }
           />
           <TextField
             id="name"
             name="name"
             label="暱稱"
             fullWidth
+            value={name}
             variant="outlined"
+            onChange={
+              (event: ChangeEvent<HTMLInputElement>) => {
+                setName(event.target.value);
+              }
+            }
           />
           <TextField
             id="role"
@@ -197,7 +239,13 @@ export const Edit: FC<UserFromProps> = ({ open, handleClose, users }) => {
             select
             label="權限"
             fullWidth
+            value={role}
             defaultValue="user"
+            onChange={
+              (event: ChangeEvent<HTMLInputElement>) => {
+                setRole(event.target.value);
+              }
+            }
           >
             <MenuItem value="admin">管理員</MenuItem>
             <MenuItem value="user">使用者</MenuItem>

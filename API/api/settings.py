@@ -69,7 +69,25 @@ async def update_notification_token (
     raise HTTPException(403, 'User does not have permission')
 
 
-@router.get('/user')
+
+@router.post('/user')
+async def users (
+  token_payload: dict = Depends(token.get),
+  username: str = Form(...)
+):
+  user_role = token_payload['role']
+
+  if user.check_role(user_role):
+    results = await user.get(username)
+
+    return JSONResponse(content = {
+      'user': results
+    })
+  else:
+    raise HTTPException(403, 'User does not have permission')
+  
+
+@router.get('/user/all')
 async def users (token_payload: dict = Depends(token.get)):
   user_role = token_payload['role']
 

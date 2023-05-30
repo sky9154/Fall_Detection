@@ -9,7 +9,7 @@ import { Added, Edit, Delete } from 'components/Settings/System/UserFrom';
 import user from 'api/user';
 
 
-const Users: FC = () => {
+const User: FC = () => {
   const [openAddedFrom, setOpenAddedFrom] = useState<boolean>(false);
   const [openEditFrom, setOpenEditFrom] = useState<boolean>(false);
   const [openDeleteFrom, setOpenDeleteFrom] = useState<boolean>(false);
@@ -95,4 +95,4 @@ const Users: FC = () => {
   );
 }
 
-export default Users;
+export default User;

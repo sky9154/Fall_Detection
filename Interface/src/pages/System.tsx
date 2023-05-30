@@ -5,7 +5,7 @@ import Divider from '@mui/material/Divider';
 import Box from '@mui/material/Box';
 import UserProfile from 'components/Settings/UserProfile';
 import UpdateNotificationToken from 'components/Settings/System/UpdateNotificationToken';
-import Users from 'components/Settings/System/Users'
+import User from 'components/Settings/System/User'
 
 const System: FC = () => (
   <Container sx={{ my: 4 }}>
@@ -34,7 +34,7 @@ const System: FC = () => (
           my={4}
         >
           <UpdateNotificationToken />
-          <Users />
+          <User />
         </Stack>
       </Box>
     </Stack>

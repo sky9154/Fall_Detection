@@ -1,9 +1,6 @@
 from fastapi import APIRouter, Response, WebSocket
-from dotenv import load_dotenv
 from functions import detection
 
-
-load_dotenv()
 
 router = APIRouter()
 
@@ -29,7 +26,8 @@ async def camera (websocket: WebSocket, camera_id: str, draw: bool, response: Re
 
     return { 'messages': 'ok' }
   except Exception as e:
-    if e.code == 1005:
-      pass
+    if e.code:
+      if e.code == 1005:
+        pass
     else:
-      print(f'[Error]\n{e}')
+      print(f'ERROR:    {e}')

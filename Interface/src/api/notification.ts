@@ -71,7 +71,7 @@ const update = async (line: string, discord: string) => {
  * 發送 Line Notify
  */
 const lineNotify = async () => {
-  const url = `http://${ip}:${port}/api/notification/line`;
+  const url = `http://${ip}:${port}/api/notification/send`;
 
   const requestOptions = {
     method: 'POST',

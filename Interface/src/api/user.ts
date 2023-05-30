@@ -142,10 +142,10 @@ const get = async (setValue: (data: {
         'Authorization': `Bearer ${token}`
       }
     };
-  
+
     fetch(url, requestOptions).then(async (response: Response) => {
       const json: User = await response.json();
-  
+
       if (response.ok) {
         setValue({
           name: json.name as string,
@@ -159,11 +159,58 @@ const get = async (setValue: (data: {
 }
 
 /**
+ * 取得使用者
+ * @param username 帳號
+ * @param set 設定
+ */
+const getUser = async (
+  username: string,
+  set: {
+    password: (password: string) => void,
+    name: (name: string) => void,
+    role: (role: string) => void
+  }
+) => {
+  const url = `http://${ip}:${port}/api/user`;
+
+  const requestOptions = {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'Authorization': `Bearer ${token}`
+    },
+    body: new URLSearchParams({
+      username: username
+    })
+  };
+
+  fetch(url, requestOptions).then(async (response: Response) => {
+    const json: {
+      user: {
+        name: string,
+        role: string,
+        username: string,
+        password: string
+      }
+    } = await response.json();
+
+    if (response.ok) {
+      const user = json.user;
+      
+
+      set.password(user.password);
+      set.name(user.name);
+      set.role(user.role);
+    }
+  });
+}
+
+/**
  * 取得使用者清單
  * @param setUsers setUsers
  */
 const getUserList = async (setUsers: (userList: string[]) => void) => {
-  const url = `http://${ip}:${port}/api/user`;
+  const url = `http://${ip}:${port}/api/user/all`;
 
   const requestOptions = {
     method: 'GET',
@@ -231,7 +278,7 @@ const edit = async (user: {
   const url = `http://${ip}:${port}/api/user/edit`;
 
   const requestOptions = {
-    method: 'POST',
+    method: 'PUT',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
       'Authorization': `Bearer ${token}`
@@ -278,7 +325,7 @@ const remove = async (username: string, user: string) => {
     await fetch(url, requestOptions).then(async (response: Response) => {
       if (response.ok) {
         toast.success('刪除成功!');
-  
+
         system.reload();
       }
     });
@@ -288,6 +335,7 @@ const remove = async (username: string, user: string) => {
 const user = {
   login,
   get,
+  getUser,
   getUserList,
   updateName,
   updatePasswoed,

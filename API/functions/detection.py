@@ -1,10 +1,14 @@
 from fastapi import WebSocket
 from mediapipe import solutions
 from keras.models import load_model
+from dotenv import load_dotenv
 import numpy  as np
 import requests
 import cv2
+import os
 
+
+load_dotenv()
 
 mp_drawing = solutions.drawing_utils
 mp_drawing_styles = solutions.drawing_styles
@@ -76,7 +80,7 @@ async def stream_video (websocket: WebSocket, camera_id: str, draw: bool):
   if pose is None:
     pose = mp_pose.Pose(
       min_detection_confidence=0.7,
-      min_tracking_confidence=0.5
+      min_tracking_confidence=0.7
     )
 
   is_esp32 = camera_id == 'esp32'
@@ -86,6 +90,10 @@ async def stream_video (websocket: WebSocket, camera_id: str, draw: bool):
   match camera_id:
     case 'test':
       cap = cv2.VideoCapture('video/fall.mp4')
+    case 'esp32':
+      CAMERA_IP = os.getenv('CAMERA_IP')
+  
+      cap = f'http://{CAMERA_IP}/jpg'
     case _:
       cap = cv2.VideoCapture(int(camera_id))
 
@@ -93,59 +101,63 @@ async def stream_video (websocket: WebSocket, camera_id: str, draw: bool):
   state = False
 
   while True:
-    if is_esp32:
-      response = requests.get(cap, stream=True)
+    try:
+      if is_esp32:
+        response = requests.get(cap, stream=True)
 
-      if response.status_code == 200:
-        frame_arr = np.array(bytearray(response.content), dtype=np.uint8)
+        if response.status_code == 200:
+          frame_arr = np.array(bytearray(response.content), dtype=np.uint8)
 
-        frame = cv2.imdecode(frame_arr, -1)
-    else: 
-      success, frame = cap.read()
+          frame = cv2.imdecode(frame_arr, cv2.IMREAD_COLOR)
+      else: 
+        success, frame = cap.read()
 
-      if not success:
-        break
+        if not success:
+          break
 
-    frame, results = await process_image(frame, pose, draw)
+      frame, results = await process_image(frame, pose, draw)
 
-    pose_landmarks = results.pose_landmarks
-    safety = 0
-    warning = 0
-    fall = 0
+      pose_landmarks = results.pose_landmarks
+      safety = 0
+      warning = 0
+      fall = 0
 
-    if pose_landmarks:
-      keypoints = await extract_keypoints(pose_landmarks)
-      keypoints = np.array(keypoints)
-      keypoints = np.expand_dims(keypoints, axis=0)
+      if pose_landmarks:
+        keypoints = await extract_keypoints(pose_landmarks)
+        keypoints = np.array(keypoints)
+        keypoints = np.expand_dims(keypoints, axis=0)
 
-      prediction = model.predict(keypoints, verbose=0)
+        prediction = model.predict(keypoints, verbose=0)
 
-      safety = round(prediction[0][0] * 100, 1)
-      warning = round(prediction[0][1] * 100, 1)
-      fall = round(prediction[0][2] * 100, 1)
+        safety = round(prediction[0][0] * 100, 1)
+        warning = round(prediction[0][1] * 100, 1)
+        fall = round(prediction[0][2] * 100, 1)
 
-    if (safety < 90) != state and not state:
-      number = 0
-      state = True
+      if (safety < 90) != state and not state:
+        number = 0
+        state = True
 
-      cv2.imwrite('temp/fall.png', frame)
+        cv2.imwrite('temp/fall.png', frame)
 
-    if safety > 90:
-      number += 1
-  
-    if number > 10:
-      number = 0
-      state = False
+      if safety > 90:
+        number += 1
+    
+      if number > 10:
+        number = 0
+        state = False
 
-    success, buffer = cv2.imencode('.jpg', frame)
-    frame = buffer.tobytes()
+      success, buffer = cv2.imencode('.jpg', frame)
+      frame = buffer.tobytes()
 
-    await websocket.send_bytes(frame)
-    await websocket.send_json({
-      'predict': {
-        'safety': safety,
-        'warning': warning,
-        'fall': fall
-      },
-      'state': state
-    })
+      await websocket.send_bytes(frame)
+      await websocket.send_json({
+        'predict': {
+          'safety': safety,
+          'warning': warning,
+          'fall': fall
+        },
+        'state': state
+      })
+    except requests.exceptions.RequestException as e:
+      break
+    
