@@ -6,7 +6,7 @@
 #include "SimStreamer.h"
 #include "OV2640Streamer.h"
 #include "CRtspSession.h"
-#include "wifi_key.h"
+#include "wifi.h"
 
 WebServer server(80);
 WiFiServer rtspServer(554);
