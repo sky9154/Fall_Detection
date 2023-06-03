@@ -11,23 +11,26 @@ async def camera (websocket: WebSocket, camera_id: str, draw: bool, response: Re
   try:
     await websocket.accept()
 
-    while True:
-      if camera_id != websocket.scope['path_params']['camera_id']:
+    current_camera_id = None
+    current_camera_draw = None
+
+    if current_camera_id == None or current_camera_draw == None:
+      current_camera_id = camera_id
+      current_camera_draw = draw
+      detection.state = False
+      
+      await detection.stream_video(websocket, camera_id, draw)
+    else:
+      if current_camera_id != camera_id or current_camera_draw != draw:
         await websocket.close()
+        await websocket.accept()
 
-        new_websocket = WebSocket(websocket.application, websocket.scope)
-
-        await new_websocket.prepare()
-        await detection.stream_video(new_websocket, camera_id, draw)
-
-        break
+        current_camera_id = camera_id
+        current_camera_draw = draw
+        detection.state = False
+        
+        await detection.stream_video(websocket, camera_id, draw)
       else:
         await detection.stream_video(websocket, camera_id, draw)
-
-    return { 'messages': 'ok' }
   except Exception as e:
-    if e.code:
-      if e.code == 1005:
-        pass
-    else:
-      print(f'ERROR:    {e}')
+    print(f'ERROR:    {e}')

@@ -3,7 +3,6 @@ from mediapipe import solutions
 from keras.models import load_model
 from dotenv import load_dotenv
 import numpy  as np
-import requests
 import cv2
 import os
 
@@ -33,7 +32,7 @@ async def extract_keypoints (results):
   return np.concatenate([pose_x, pose_y])
 
 
-async def process_image (frame, pose, draw: bool):
+async def process_image (frame):
   '''
   調整影像大小，並進行姿勢估計
   '''
@@ -54,17 +53,8 @@ async def process_image (frame, pose, draw: bool):
 
   resized = cv2.resize(image, (1280, 720), interpolation = cv2.INTER_AREA)
   resized = cv2.cvtColor(resized, cv2.COLOR_BGR2RGB)
-  results = pose.process(resized)
 
-  if draw:
-    mp_drawing.draw_landmarks(
-      image,
-      results.pose_landmarks,
-      mp_pose.POSE_CONNECTIONS,
-      landmark_drawing_spec=mp_drawing_styles.get_default_pose_landmarks_style()
-    )
-
-  return image, results
+  return image
 
 
 async def stream_video (websocket: WebSocket, camera_id: str, draw: bool):
@@ -72,7 +62,15 @@ async def stream_video (websocket: WebSocket, camera_id: str, draw: bool):
   傳輸影像串流
   '''
 
-  global model, pose, state, line_token
+  global model, pose, state
+
+  cap = None
+
+  number = 0
+  safety = 0
+  warning = 0
+  fall = 0
+  index = 1
 
   if model is None:
     model = load_model('model/LSTM.h5')
@@ -80,71 +78,66 @@ async def stream_video (websocket: WebSocket, camera_id: str, draw: bool):
   if pose is None:
     pose = mp_pose.Pose(
       min_detection_confidence=0.7,
-      min_tracking_confidence=0.7
+      min_tracking_confidence=0.7,
+      model_complexity=0
     )
-
-  is_esp32 = camera_id == 'esp32'
-
-  cap = None
 
   match camera_id:
     case 'test':
       cap = cv2.VideoCapture('video/fall.mp4')
     case 'esp32':
       CAMERA_IP = os.getenv('CAMERA_IP')
-  
-      cap = f'http://{CAMERA_IP}/jpg'
+
+      cap = cv2.VideoCapture(f'rtsp://{CAMERA_IP}/mjpeg/1')
     case _:
       cap = cv2.VideoCapture(int(camera_id))
 
-  number = 0
-  state = False
-
   while True:
     try:
-      if is_esp32:
-        response = requests.get(cap, stream=True)
+      success, frame = cap.read()
 
-        if response.status_code == 200:
-          frame_arr = np.array(bytearray(response.content), dtype=np.uint8)
+      if not success:
+        break
 
-          frame = cv2.imdecode(frame_arr, cv2.IMREAD_COLOR)
-      else: 
-        success, frame = cap.read()
+      frame = await process_image(frame)
 
-        if not success:
-          break
+      if index == 5 or draw:
+        index = 0
+        results = pose.process(frame)
 
-      frame, results = await process_image(frame, pose, draw)
+        if draw:
+          mp_drawing.draw_landmarks(
+            frame,
+            results.pose_landmarks,
+            mp_pose.POSE_CONNECTIONS,
+            landmark_drawing_spec=mp_drawing_styles.get_default_pose_landmarks_style()
+          )
 
-      pose_landmarks = results.pose_landmarks
-      safety = 0
-      warning = 0
-      fall = 0
+        pose_landmarks = results.pose_landmarks
 
-      if pose_landmarks:
-        keypoints = await extract_keypoints(pose_landmarks)
-        keypoints = np.array(keypoints)
-        keypoints = np.expand_dims(keypoints, axis=0)
+        if pose_landmarks:
+          keypoints = await extract_keypoints(pose_landmarks)
+          keypoints = np.array(keypoints)
+          keypoints = np.expand_dims(keypoints, axis=0)
 
-        prediction = model.predict(keypoints, verbose=0)
+          prediction = model.predict(keypoints, verbose=0)
 
-        safety = round(prediction[0][0] * 100, 1)
-        warning = round(prediction[0][1] * 100, 1)
-        fall = round(prediction[0][2] * 100, 1)
+          safety = round(prediction[0][0] * 100, 1)
+          warning = round(prediction[0][1] * 100, 1)
+          fall = round(prediction[0][2] * 100, 1)
 
-      if (safety < 90) != state and not state:
-        number = 0
-        state = True
+        if (safety < 90) != state and not state:
+          number = 0
+          state = True
 
-        cv2.imwrite('temp/fall.png', frame)
+          cv2.imwrite('temp/fall.png', frame)
 
-      if safety > 90:
-        number += 1
-    
-      if number > 10:
-        number = 0
-        state = False
+        if safety > 90:
+          number += 1
+      
+        if number > 10:
+          number = 0
+          state = False
 
       success, buffer = cv2.imencode('.jpg', frame)
       frame = buffer.tobytes()
@@ -158,6 +151,10 @@ async def stream_video (websocket: WebSocket, camera_id: str, draw: bool):
         },
         'state': state
       })
-    except requests.exceptions.RequestException as e:
+
+      index += 1
+    except Exception as e:
+      print(f'ERROR:    {e}')
+      
       break
     
