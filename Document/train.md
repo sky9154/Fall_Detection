@@ -17,7 +17,7 @@
 使用 `UR Fall Detection Dataset` 以及 `Fall Detection Dataset` 兩個數據集進行訓練。
 
 ### 1. 將兩個數據集的影像尺寸統一調整為 640 * 480。
-[相關程式碼](tools/images_resize.py)
+[相關程式碼](../Train/tools/images_resize.py)
 
 ### 2. 透過 `Mediapipe` 取得骨架。
 使用 `Mediapipe` 的 `Pose` 模型可以標記出身體 33 個關節點的位置。
@@ -28,13 +28,13 @@
 
 ![範例 骨架](https://i.imgur.com/a7CoV9y.png)
 
-[相關程式碼](tools/pose_get.py)
+[相關程式碼](../Train/tools/pose_get.py)
 
 ## 數據預處理
 ### 1. 資料增強
 確保訓練時不會產生過度擬合，將圖像進行旋轉，創造出更多的圖像來讓機器學習，彌補資料量的不足。
 
-[相關程式碼](tools/data_augmentation.py)
+[相關程式碼](../Train/tools/data_augmentation.py)
 
 ### 2. 位移人體骨架
 將人體骨架將移動到圖像中央，去除了原始數據中，人體位移過程這個特徵，像是左走到右或是從遠方走到近，將人體骨架固定在相同位置，做出連續動作讓模型更容易學習。
@@ -75,12 +75,12 @@ $Y^{}_{r} = Y^{}_{n} - Y^{}_{dis}$
 
 ### 3. 線性插值
 **線性插值前的分佈圖**
-![線性插值前的分佈圖](docs/After_Linear_Interpolation.png)
+![線性插值前的分佈圖](images/After_Linear_Interpolation.png)
 
 **線性插值後的分佈圖**
-![性插值後的分佈圖](docs/Before_Linear_Interpolation.png)
+![性插值後的分佈圖](images/Before_Linear_Interpolation.png)
 
-[相關程式碼](tools/linear_interpolation.py)
+[相關程式碼](../Train/tools/linear_interpolation.py)
 
 ## 模型訓練
 [訓練過程](lstm_model.ipynb)
@@ -91,7 +91,7 @@ $Y^{}_{r} = Y^{}_{n} - Y^{}_{dis}$
 | NVIDIA A100 | 	Intel Xeon |
 
 ### 模型結構
-![模型結構](docs/Model_Layer.png)
+![模型結構](images/BinaryOutput/Model_Layer.png)
 
 ### 訓練參數
 | 名稱 | 參數 |
@@ -112,7 +112,7 @@ $Y^{}_{r} = Y^{}_{n} - Y^{}_{dis}$
 
 ## 模型測試
 ### 訓練結果
-![訓練結果](docs/Accuracy.png)
+![訓練結果](images/BinaryOutput/Accuracy.png)
 
 ### 評估 LSTM 模型
 | Test Loss | Test Accuracy |
@@ -125,12 +125,12 @@ $Y^{}_{r} = Y^{}_{n} - Y^{}_{dis}$
 | 31298 | 702 |
 
 ### 混淆矩陣
-![混淆矩陣](docs/Confusion_Matrix.png)
+![混淆矩陣](images/BinaryOutput/Confusion_Matrix.png)
 
 ## 測試模型
-![測試模型](docs/Demo.gif)
+![測試模型](images/Demo.gif)
 
-[模型測試完整版](docs/Fall_Detection_Test.mp4)
+[模型測試完整版](video/Fall_Detection_Test.mp4)
 
 # 參考資料
 * [Lin, Chuan-Bi, et al. "A framework for fall detection based on OpenPose skeleton and LSTM/GRU models." Applied Sciences 11.1 (2020): 329.](http://ir.lib.cyut.edu.tw:8080/bitstream/310901800/38339/1/108CYUT0652018-003.pdf)
