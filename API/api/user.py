@@ -1,8 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException, Form
 from fastapi.security import OAuth2PasswordRequestForm
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, FileResponse
 from bson import ObjectId
 from functions import token, user
+import os
 
 
 router = APIRouter()
@@ -25,7 +26,18 @@ async def get (token_payload: dict = Depends(token.get)):
   return JSONResponse(content= token_payload)
 
 
-@router.post('/get/username')
+@router.get('/get/avatar/{username}')
+async def users (username: str):
+  if user.check_username(username):
+    image = f'temp/avatar/{username}.png'
+    
+    if os.path.isfile(image):
+      return FileResponse(image, media_type='image/jpeg')
+  else:
+    raise HTTPException(400, 'Invalid username')
+
+
+@router.get('/get/username')
 async def users (
   token_payload: dict = Depends(token.get),
   username: str = Form(...)
