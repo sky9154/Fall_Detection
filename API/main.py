@@ -24,16 +24,10 @@ def create_app ():
 
 app = create_app()
 
-routers = [
-  api.authentication_router,
-  api.detection_router,
-  api.introduction_card_router,
-  api.notification_router,
-  api.settings_router
-]
-
-for router in routers:
-  app.include_router(router, prefix='/api')
+app.include_router(api.Contact, prefix='/api/contact')
+app.include_router(api.Detection, prefix='/ws/stream')
+app.include_router(api.Notification, prefix='/api/notification')
+app.include_router(api.User, prefix='/api/user')
 
 IP = os.getenv('IP')
 PORT = int(os.getenv('PORT'))

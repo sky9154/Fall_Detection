@@ -1,12 +1,10 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, Form
 from fastapi.responses import JSONResponse
-from datetime import datetime, timezone, timedelta
-from functions import token, notification, sensor
-
+from functions import token, notification, user, sensor
 
 router = APIRouter()
 
-@router.get('/notification/token')
+@router.get('/get/token')
 async def get_token (token_payload: dict = Depends(token.get)):
   result = await notification.get_token()
 
@@ -16,7 +14,26 @@ async def get_token (token_payload: dict = Depends(token.get)):
   })
 
 
-@router.post('/notification/send')
+@router.put('/update/token')
+async def update_notification_token (
+  token_payload: dict = Depends(token.get),
+  line: str = Form(default=''),
+  discord: str = Form(default='')
+):
+  user_role = token_payload['role']
+
+  if user.check_role(user_role):
+    line = line.strip()
+    discord = discord.strip()
+  
+    await notification.update_token(line, discord)
+
+    raise HTTPException(201, 'Notification token updated successfully')
+  else:
+    raise HTTPException(403, 'User does not have permission')
+
+
+@router.post('/send')
 async def send (token_payload: dict = Depends(token.get)):
   result = await sensor.get()
 

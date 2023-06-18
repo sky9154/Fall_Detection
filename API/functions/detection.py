@@ -17,7 +17,9 @@ model = None
 pose = None
 state = False
 
-async def extract_keypoints (results):
+THRESHOLD = int(os.getenv('THRESHOLD'))
+
+async def extract_keypoints (results) -> tuple[list, float]:
   '''
   提取關鍵點
   '''
@@ -28,8 +30,11 @@ async def extract_keypoints (results):
 
   pose_x = [landmarks[i].x * 1280 for i in indices]
   pose_y = [landmarks[i].y * 720 for i in indices]
+  visibility = [landmarks[i].visibility for i in indices]
 
-  return np.concatenate([pose_x, pose_y])
+  average_visibility = sum(visibility) / len(visibility)
+
+  return np.concatenate([pose_x, pose_y]), average_visibility
 
 
 async def process_image (frame):
@@ -57,7 +62,7 @@ async def process_image (frame):
   return image
 
 
-async def stream_video (websocket: WebSocket, camera_id: str, draw: bool):
+async def stream (websocket: WebSocket, camera_id: str, draw: bool):
   '''
   傳輸影像串流
   '''
@@ -65,15 +70,15 @@ async def stream_video (websocket: WebSocket, camera_id: str, draw: bool):
   global model, pose, state
 
   cap = None
+  state=False
 
   number = 0
   safety = 0
   warning = 0
   fall = 0
-  index = 1
 
   if model is None:
-    model = load_model('model/LSTM.h5')
+    model = load_model('model/LSTM_01.h5')
 
   if pose is None:
     pose = mp_pose.Pose(
@@ -101,43 +106,48 @@ async def stream_video (websocket: WebSocket, camera_id: str, draw: bool):
 
       frame = await process_image(frame)
 
-      if index == 5 or draw:
-        index = 0
-        results = pose.process(frame)
+      results = pose.process(frame)
 
-        if draw:
-          mp_drawing.draw_landmarks(
-            frame,
-            results.pose_landmarks,
-            mp_pose.POSE_CONNECTIONS,
-            landmark_drawing_spec=mp_drawing_styles.get_default_pose_landmarks_style()
-          )
+      if draw:
+        mp_drawing.draw_landmarks(
+          frame,
+          results.pose_landmarks,
+          mp_pose.POSE_CONNECTIONS,
+          landmark_drawing_spec=mp_drawing_styles.get_default_pose_landmarks_style()
+        )
 
-        pose_landmarks = results.pose_landmarks
+      pose_landmarks = results.pose_landmarks
+      average_visibility = 0
 
-        if pose_landmarks:
-          keypoints = await extract_keypoints(pose_landmarks)
-          keypoints = np.array(keypoints)
-          keypoints = np.expand_dims(keypoints, axis=0)
+      if pose_landmarks:
+        keypoints, average_visibility = await extract_keypoints(pose_landmarks)
+        keypoints = np.array(keypoints)
+        keypoints = np.expand_dims(keypoints, axis=0)
 
+        average_visibility = round(average_visibility * 100, 1)
+
+        if average_visibility >= THRESHOLD:
           prediction = model.predict(keypoints, verbose=0)
 
           safety = round(prediction[0][0] * 100, 1)
           warning = round(prediction[0][1] * 100, 1)
           fall = round(prediction[0][2] * 100, 1)
 
-        if (safety < 90) != state and not state:
-          number = 0
-          state = True
+      if (safety < 90) != state and not state:
+        number = 0
+        state = True
 
-          cv2.imwrite('temp/fall.png', frame)
+        print(f'INFO:     可信值: {average_visibility} %')
 
-        if safety > 90:
-          number += 1
-      
-        if number > 10:
-          number = 0
-          state = False
+        cv2.imwrite('temp/fall.png', frame)
+
+      if safety > 90:
+        number += 1
+    
+      if number > 10:
+        number = 0
+        state = False
+
 
       success, buffer = cv2.imencode('.jpg', frame)
       frame = buffer.tobytes()
@@ -151,8 +161,6 @@ async def stream_video (websocket: WebSocket, camera_id: str, draw: bool):
         },
         'state': state
       })
-
-      index += 1
     except Exception as e:
       print(f'ERROR:    {e}')
       

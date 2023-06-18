@@ -1,11 +1,15 @@
 from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
 from jwt import encode, decode
+from dotenv import load_dotenv
+import os
 
+
+load_dotenv()
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl='authenticate')
 
-SECRET_KEY = 'kirito'
+SECRET_KEY = os.getenv('SECRET_KEY')
 
 def generate (result: dict) -> str:
   '''

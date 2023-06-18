@@ -1,10 +1,58 @@
 from fastapi import APIRouter, Depends, HTTPException, Form
+from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.responses import JSONResponse
 from bson import ObjectId
-from functions import token, notification, user
+from functions import token, user
 
 
 router = APIRouter()
+
+@router.post('/login')
+async def login (credentials: OAuth2PasswordRequestForm = Depends()):
+  result = await user.get(credentials.username)
+
+  if not result or result['password'] != credentials.password:
+    raise HTTPException(401, 'Incorrect username or password')
+
+  return JSONResponse(content = { 
+    'access_token': token.generate(result),
+    'token_type': 'bearer' 
+  })
+
+
+@router.get('/get/token')
+async def get (token_payload: dict = Depends(token.get)):
+  return JSONResponse(content= token_payload)
+
+
+@router.post('/get/username')
+async def users (
+  token_payload: dict = Depends(token.get),
+  username: str = Form(...)
+):
+  user_role = token_payload['role']
+
+  if user.check_role(user_role):
+    result = await user.get(username)
+
+    return JSONResponse(content = result)
+  else:
+    raise HTTPException(403, 'User does not have permission')
+  
+
+@router.get('/get/all')
+async def users (token_payload: dict = Depends(token.get)):
+  user_role = token_payload['role']
+
+  if user.check_role(user_role):
+    results = await user.get_all()
+
+    users = [result.get('username') for result in results]
+
+    return JSONResponse(content = users)
+  else:
+    raise HTTPException(403, 'User does not have permission')
+
 
 @router.put('/update/name')
 async def update_name (
@@ -48,62 +96,9 @@ async def update_password (
       raise HTTPException(400, 'Invalid password')
   else:
     raise HTTPException(404, 'User not found')
-
-
-@router.put('/update/notification/token')
-async def update_notification_token (
-  token_payload: dict = Depends(token.get),
-  line: str = Form(default=''),
-  discord: str = Form(default='')
-):
-  user_role = token_payload['role']
-
-  if user.check_role(user_role):
-    line = line.strip()
-    discord = discord.strip()
-  
-    await notification.update_token(line, discord)
-
-    raise HTTPException(201, 'Notification token updated successfully')
-  else:
-    raise HTTPException(403, 'User does not have permission')
-
-
-
-@router.post('/user')
-async def users (
-  token_payload: dict = Depends(token.get),
-  username: str = Form(...)
-):
-  user_role = token_payload['role']
-
-  if user.check_role(user_role):
-    results = await user.get(username)
-
-    return JSONResponse(content = {
-      'user': results
-    })
-  else:
-    raise HTTPException(403, 'User does not have permission')
   
 
-@router.get('/user/all')
-async def users (token_payload: dict = Depends(token.get)):
-  user_role = token_payload['role']
-
-  if user.check_role(user_role):
-    results = await user.get_all()
-
-    users = [result.get('username') for result in results]
-
-    return JSONResponse(content = {
-      'users': users
-    })
-  else:
-    raise HTTPException(403, 'User does not have permission')
-
-
-@router.post('/user/create')
+@router.post('/create')
 async def user_create (
   token_payload: dict = Depends(token.get),
   username: str = Form(...),
@@ -151,7 +146,7 @@ async def user_create (
     raise HTTPException(403, 'User does not have permission')
 
 
-@router.put('/user/edit')
+@router.put('/edit')
 async def user_edit (
   token_payload: dict = Depends(token.get),
   username: str = Form(...),
@@ -198,7 +193,7 @@ async def user_edit (
     raise HTTPException(403, 'User does not have permission')
   
 
-@router.delete('/user/delete')
+@router.delete('/delete')
 async def user_delete (
   token_payload: dict = Depends(token.get),
   username: str = Form(...)
