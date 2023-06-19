@@ -99,7 +99,6 @@ const Login: FC = () => {
                   label="Username"
                   name="username"
                   autoComplete="username"
-                  autoFocus
                   fullWidth
                   required
                   InputProps={{
@@ -115,7 +114,6 @@ const Login: FC = () => {
                   label="Password"
                   name="password"
                   type={(showPassword) ? "text" : "password"}
-                  autoComplete="current-password"
                   fullWidth
                   required
                   InputProps={{
