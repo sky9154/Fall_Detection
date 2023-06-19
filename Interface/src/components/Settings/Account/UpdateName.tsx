@@ -22,13 +22,13 @@ const UpdateName: FC = () => {
 
     if (name) {
       if (check.name(name as string)) {
-        user.updateName(name as string, auth.user);
-        
-        setTimeout(() => {
-          auth.handleLogout();
-
-          navigate('/login');
-        }, 500);
+        await user.updateName(name as string).then(() => {
+          setTimeout(() => {
+            auth.handleLogout();
+  
+            navigate('/login');
+          }, 800);
+        });
       }
     }
   }

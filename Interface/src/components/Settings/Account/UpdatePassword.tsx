@@ -75,13 +75,13 @@ const UpdatePassword: FC = () => {
 
     if (oldPassword && newPassword && !passwordState) {
       if (check.password(newPassword as string)) {
-        user.updatePasswoed(oldPassword as string, newPassword as string);
+        await user.updatePasswoed(oldPassword as string, newPassword as string).then(() => {
+          setTimeout(() => {
+            auth.handleLogout();
 
-        setTimeout(() => {
-          auth.handleLogout();
-
-          navigate('/login');
-        }, 500);
+            navigate('/login');
+          }, 800);
+        });
       }
     }
   }

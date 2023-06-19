@@ -3,7 +3,7 @@ import Container from '@mui/material/Container';
 import Stack from '@mui/material/Stack';
 import Divider from '@mui/material/Divider';
 import Box from '@mui/material/Box';
-import UserProfile from 'components/Settings/UserProfile';
+import UserProfile from 'components/Layouts/UserProfile';
 import UpdateName from 'components/Settings/Account/UpdateName';
 import UpdatePassword from 'components/Settings/Account/UpdatePassword';
 

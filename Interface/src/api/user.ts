@@ -1,5 +1,4 @@
 import toast from 'react-hot-toast';
-import { NetworkAddress } from 'assets/data';
 import system from 'functions/system';
 
 
@@ -12,16 +11,10 @@ interface User {
   name: string | null;
   role: string | null;
   username: string | null;
-  avatar: string | null;
 }
 
-type userProps = {
-  value: User;
-  setValue: (user: User) => void;
-}
-
-const ip = NetworkAddress.ip;
-const port = NetworkAddress.port;
+const IP = process.env.REACT_APP_IP;
+const PORT = process.env.REACT_APP_PORT;
 const token = localStorage.getItem('access_token');
 
 /**
@@ -35,7 +28,7 @@ const login = async (
   username: string,
   password: string
 ) => {
-  const url = `http://${ip}:${port}/api/authenticate`;
+  const url = `http://${IP}:${PORT}/api/user/login`;
 
   const requestOptions = {
     method: 'POST',
@@ -56,7 +49,7 @@ const login = async (
 
       localStorage.setItem('access_token', json.access_token);
 
-      navigate('/');
+      navigate('/home');
 
       system.reload();
     } else if (response.status === 401) {
@@ -70,8 +63,8 @@ const login = async (
  * @param name 暱稱
  * @param user user
  */
-const updateName = async (name: string, user: userProps) => {
-  const url = `http://${ip}:${port}/api/update/name`;
+const updateName = async (name: string) => {
+  const url = `http://${IP}:${PORT}/api/user/update/name`;
 
   const requestOptions = {
     method: 'PUT',
@@ -87,11 +80,6 @@ const updateName = async (name: string, user: userProps) => {
   await fetch(url, requestOptions).then(async (response: Response) => {
     if (response.ok) {
       toast.success('更改成功，請重新登入!');
-
-      user.setValue({
-        ...user.value,
-        name: name
-      });
     }
   });
 }
@@ -102,7 +90,7 @@ const updateName = async (name: string, user: userProps) => {
  * @param newPassword 新密碼
  */
 const updatePasswoed = async (oldPassword: string, newPassword: string) => {
-  const url = `http://${ip}:${port}/api/update/password`;
+  const url = `http://${IP}:${PORT}/api/user/update/password`;
 
   const requestOptions = {
     method: 'PUT',
@@ -127,15 +115,15 @@ const updatePasswoed = async (oldPassword: string, newPassword: string) => {
  * 取得使用者資料
  * @param setValue setValue
  */
-const get = async (setValue: (data: {
-  name: string,
-  role: string,
-  username: string,
-  avatar: string
-}) => void) => {
-  const url = `http://${ip}:${port}/api/protected`;
-
+const get = async (
+  user: (user: {
+    name: string,
+    role: string,
+    username: string
+  }) => void) => {
   if (token) {
+    const url = `http://${IP}:${PORT}/api/user/get/token`;
+
     const requestOptions = {
       method: 'GET',
       headers: {
@@ -143,15 +131,14 @@ const get = async (setValue: (data: {
       }
     };
 
-    fetch(url, requestOptions).then(async (response: Response) => {
-      const json: User = await response.json();
-
+    await fetch(url, requestOptions).then(async (response: Response) => {
       if (response.ok) {
-        setValue({
+        const json: User = await response.json();
+
+        user({
           name: json.name as string,
           role: json.role as string,
-          username: json.username as string,
-          avatar: `${json.username}.jpg` as string
+          username: json.username as string
         });
       }
     });
@@ -171,10 +158,10 @@ const getUser = async (
     role: (role: string) => void
   }
 ) => {
-  const url = `http://${ip}:${port}/api/user`;
+  const url = `http://${IP}:${PORT}/api/user`;
 
   const requestOptions = {
-    method: 'POST',
+    method: 'GET',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
       'Authorization': `Bearer ${token}`
@@ -196,7 +183,6 @@ const getUser = async (
 
     if (response.ok) {
       const user = json.user;
-      
 
       set.password(user.password);
       set.name(user.name);
@@ -210,7 +196,7 @@ const getUser = async (
  * @param setUsers setUsers
  */
 const getUserList = async (setUsers: (userList: string[]) => void) => {
-  const url = `http://${ip}:${port}/api/user/all`;
+  const url = `http://${IP}:${PORT}/api/user/all`;
 
   const requestOptions = {
     method: 'GET',
@@ -240,7 +226,7 @@ const create = async (user: {
   name: string,
   role: string
 }) => {
-  const url = `http://${ip}:${port}/api/user/create`;
+  const url = `http://${IP}:${PORT}/api/user/create`;
 
   const requestOptions = {
     method: 'POST',
@@ -275,7 +261,7 @@ const edit = async (user: {
   name: string,
   role: string
 }) => {
-  const url = `http://${ip}:${port}/api/user/edit`;
+  const url = `http://${IP}:${PORT}/api/user/edit`;
 
   const requestOptions = {
     method: 'PUT',
@@ -306,7 +292,7 @@ const edit = async (user: {
  * @param username 帳號
  */
 const remove = async (username: string, user: string) => {
-  const url = `http://${ip}:${port}/api/user/delete`;
+  const url = `http://${IP}:${PORT}/api/user/delete`;
 
   const requestOptions = {
     method: 'DELETE',
