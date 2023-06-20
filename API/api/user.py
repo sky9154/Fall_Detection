@@ -22,12 +22,12 @@ async def login (credentials: OAuth2PasswordRequestForm = Depends()):
 
 
 @router.get('/get/token')
-async def get (token_payload: dict = Depends(token.get)):
+async def get_token (token_payload: dict = Depends(token.get)):
   return JSONResponse(content= token_payload)
 
 
 @router.get('/get/avatar/{username}')
-async def users (username: str):
+async def get_avatar (username: str):
   if user.check_username(username):
     image = f'temp/avatar/{username}.png'
     
@@ -37,23 +37,23 @@ async def users (username: str):
     raise HTTPException(400, 'Invalid username')
 
 
-@router.get('/get/username')
-async def users (
-  token_payload: dict = Depends(token.get),
-  username: str = Form(...)
-):
+@router.get('/get/username/{username}')
+async def get_username (token_payload: dict = Depends(token.get), username: str = ''):
   user_role = token_payload['role']
 
   if user.check_role(user_role):
-    result = await user.get(username)
+    if username != '':
+      result = await user.get(username)
 
-    return JSONResponse(content = result)
+      return JSONResponse(content = result)
+    else:
+      raise HTTPException(400, 'Invalid username')
   else:
     raise HTTPException(403, 'User does not have permission')
   
 
 @router.get('/get/all')
-async def users (token_payload: dict = Depends(token.get)):
+async def get_all (token_payload: dict = Depends(token.get)):
   user_role = token_payload['role']
 
   if user.check_role(user_role):
@@ -111,7 +111,7 @@ async def update_password (
   
 
 @router.post('/create')
-async def user_create (
+async def create (
   token_payload: dict = Depends(token.get),
   username: str = Form(...),
   password: str = Form(...),
@@ -159,7 +159,7 @@ async def user_create (
 
 
 @router.put('/edit')
-async def user_edit (
+async def edit (
   token_payload: dict = Depends(token.get),
   username: str = Form(...),
   password: str = Form(...),
@@ -206,7 +206,7 @@ async def user_edit (
   
 
 @router.delete('/delete')
-async def user_delete (
+async def delete (
   token_payload: dict = Depends(token.get),
   username: str = Form(...)
 ):
