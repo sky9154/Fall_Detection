@@ -10,7 +10,7 @@ async def get_token () -> dict:
   取得 Notification Token
   '''
 
-  results = await mongodb.find('NotificationToken', { })
+  results = await mongodb.find('Notification', { })
   line = ''
   discord = ''
 
@@ -31,7 +31,7 @@ async def update_token (line: str, discord: str):
   修改 Notification Token
   '''
 
-  await mongodb.update('NotificationToken', { 
+  await mongodb.update('Notification', { 
     'class': 'line' 
   }, { 
     '$set': {
@@ -39,7 +39,7 @@ async def update_token (line: str, discord: str):
     }
   })
 
-  await mongodb.update('NotificationToken', { 
+  await mongodb.update('Notification', { 
     'class': 'discord' 
   }, { 
     '$set': {
