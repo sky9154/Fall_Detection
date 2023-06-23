@@ -17,7 +17,7 @@ const IP = process.env.REACT_APP_IP;
 const PORT = process.env.REACT_APP_PORT;
 
 const UserProfile: FC = () => {
-  const { user } = useAuthContext();
+  const { userState } = useAuthContext();
 
   const [isMouseOver, setIsMouseOver] = useState(false);
 
@@ -43,8 +43,8 @@ const UserProfile: FC = () => {
     >
       <H1>{item.name}</H1>
       <Avatar
-        alt={`${user.value.name}`}
-        src={(user.value.username) ? `http://${IP}:${PORT}/api/user/get/avatar/${user.value.username}` : ''}
+        alt={`${userState.value.name}`}
+        src={(userState.value.username) ? `http://${IP}:${PORT}/api/user/get/avatar/${userState.value.username}` : ''}
         sx={{
           width: 128,
           height: 128,
@@ -54,8 +54,8 @@ const UserProfile: FC = () => {
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       />
-      <H3>{user.value.name}</H3>
-      <Paragraph color="text.secondary">{user.value.role}@{user.value.username}</Paragraph>
+      <H3>{userState.value.name}</H3>
+      <Paragraph color="text.secondary">{userState.value.role}@{userState.value.username}</Paragraph>
     </Box>
   );
 }

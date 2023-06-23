@@ -13,7 +13,7 @@ import user from 'api/user';
 
 
 const UpdatePassword: FC = () => {
-  const auth = useAuthContext();
+  const { userState, handleLogout } = useAuthContext();
   const navigate = useNavigate();
 
   const [showPassword, setShowPassword] = useState<{
@@ -77,7 +77,7 @@ const UpdatePassword: FC = () => {
       if (check.password(newPassword as string)) {
         await user.updatePasswoed(oldPassword as string, newPassword as string).then(() => {
           setTimeout(() => {
-            auth.handleLogout();
+            handleLogout();
 
             navigate('/login');
           }, 800);
@@ -108,7 +108,7 @@ const UpdatePassword: FC = () => {
         <H2>帳號登入</H2>
         <OutlinedInput
           id="username"
-          defaultValue={auth.user.value.username}
+          defaultValue={userState.value.username}
           disabled
           fullWidth
         />

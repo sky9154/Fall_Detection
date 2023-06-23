@@ -11,7 +11,7 @@ import user from 'api/user';
 
 
 const UpdateName: FC = () => {
-  const auth = useAuthContext();
+  const { userState, handleLogout } = useAuthContext();
   const navigate = useNavigate();
 
   const updateName = async (event: FormEvent<HTMLFormElement>) => {
@@ -24,7 +24,7 @@ const UpdateName: FC = () => {
       if (check.name(name as string)) {
         await user.updateName(name as string).then(() => {
           setTimeout(() => {
-            auth.handleLogout();
+            handleLogout();
   
             navigate('/login');
           }, 800);
@@ -55,7 +55,7 @@ const UpdateName: FC = () => {
         <OutlinedInput
           id="name"
           name="name"
-          defaultValue={auth.user.value.name}
+          defaultValue={userState.value.name}
           fullWidth
         />
         <SubmitButton />

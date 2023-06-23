@@ -23,6 +23,9 @@ interface Props {
   children: ReactElement;
 }
 
+const IP = process.env.REACT_APP_IP;
+const PORT = process.env.REACT_APP_PORT;
+
 const ElevationScroll = (props: Props) => {
   const { children } = props;
 
@@ -38,7 +41,7 @@ const ElevationScroll = (props: Props) => {
 
 const DashboardNavbar: FC = (props: any) => {
   const [anchorElUser, setAnchorElUser] = useState<null | HTMLElement>(null);
-  const { user, handleLogout } = useAuthContext();
+  const { userState, handleLogout } = useAuthContext();
   const navigate = useNavigate();
 
   const handleOpenUserMenu = (event: MouseEvent<HTMLElement>) => setAnchorElUser(event.currentTarget);
@@ -58,7 +61,7 @@ const DashboardNavbar: FC = (props: any) => {
 
           break;
         case 'system':
-          if (user.value.role === 'admin') {
+          if (userState.value.role === 'admin') {
             navigate(`/${key}`);
           } else {
             toast.error('權限不足!');
@@ -89,7 +92,7 @@ const DashboardNavbar: FC = (props: any) => {
               }}
             >
               <Link
-                to="/"
+                to="/home"
                 style={{
                   textDecoration: 'none',
                   color: '#FFF',
@@ -105,7 +108,16 @@ const DashboardNavbar: FC = (props: any) => {
               <Box sx={{ flexGrow: 0 }}>
                 <Tooltip title="設定選單">
                   <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                    <Avatar alt={user.value.name || ''} src={`static/images/avatar/${user.value.avatar}`} />
+                    <Avatar
+                      alt={
+                        userState.value.name || ''
+                      }
+                      src={
+                        (userState.value.username) ?
+                          `http://${IP}:${PORT}/api/user/get/avatar/${userState.value.username}` :
+                          ''
+                      }
+                    />
                   </IconButton>
                 </Tooltip>
                 <Menu
