@@ -7,7 +7,7 @@ async def get_all () -> list:
   '''
 
   results = await mongodb.find('Users', { })
-  
+
   return results
 
 
@@ -100,7 +100,7 @@ def check_name (name: str) -> bool:
   檢查暱稱長度
   '''
 
-  return len(name) > 3
+  return len(name) >= 3
 
 
 def check_username (username: str) -> bool:
