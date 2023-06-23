@@ -55,11 +55,12 @@ async def get_username (token_payload: dict = Depends(token.get), username: str 
 @router.get('/get/all')
 async def get_all (token_payload: dict = Depends(token.get)):
   user_role = token_payload['role']
+  user_username = token_payload['username']
 
   if user.check_role(user_role):
     results = await user.get_all()
 
-    users = [result.get('username') for result in results]
+    users = [result.get('username') for result in results if result['username'] != user_username]
 
     return JSONResponse(content = users)
   else:
