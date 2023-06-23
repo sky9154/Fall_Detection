@@ -3,9 +3,10 @@ import Container from '@mui/material/Container';
 import Stack from '@mui/material/Stack';
 import Divider from '@mui/material/Divider';
 import Box from '@mui/material/Box';
-import UserProfile from 'components/Settings/UserProfile';
+import UserProfile from 'components/Layouts/UserProfile';
 import UpdateNotificationToken from 'components/Settings/System/UpdateNotificationToken';
 import User from 'components/Settings/System/User'
+
 
 const System: FC = () => (
   <Container sx={{ my: 4 }}>

@@ -41,7 +41,7 @@ const login = async (
     })
   };
 
-  await fetch(url, requestOptions).then(async (response: Response) => {
+  fetch(url, requestOptions).then(async (response: Response) => {
     const json: AccessToken = await response.json();
 
     if (response.ok) {
@@ -57,6 +57,7 @@ const login = async (
     }
   });
 }
+
 
 /**
  * 修改暱稱
@@ -77,12 +78,13 @@ const updateName = async (name: string) => {
     })
   };
 
-  await fetch(url, requestOptions).then(async (response: Response) => {
+  fetch(url, requestOptions).then(async (response: Response) => {
     if (response.ok) {
       toast.success('更改成功，請重新登入!');
     }
   });
 }
+
 
 /**
  * 修改密碼
@@ -104,12 +106,13 @@ const updatePasswoed = async (oldPassword: string, newPassword: string) => {
     })
   };
 
-  await fetch(url, requestOptions).then(async (response: Response) => {
+  fetch(url, requestOptions).then(async (response: Response) => {
     if (response.ok) {
       toast.success('更改成功!，請重新登入!');
     }
   });
 }
+
 
 /**
  * 取得使用者資料
@@ -131,7 +134,7 @@ const get = async (
       }
     };
 
-    await fetch(url, requestOptions).then(async (response: Response) => {
+    fetch(url, requestOptions).then(async (response: Response) => {
       if (response.ok) {
         const json: User = await response.json();
 
@@ -144,6 +147,7 @@ const get = async (
     });
   }
 }
+
 
 /**
  * 取得使用者
@@ -158,31 +162,23 @@ const getUser = async (
     role: (role: string) => void
   }
 ) => {
-  const url = `http://${IP}:${PORT}/api/user`;
+  const url = `http://${IP}:${PORT}/api/user/get/username/${username}`;
 
   const requestOptions = {
     method: 'GET',
     headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
       'Authorization': `Bearer ${token}`
-    },
-    body: new URLSearchParams({
-      username: username
-    })
+    }
   };
 
   fetch(url, requestOptions).then(async (response: Response) => {
-    const json: {
-      user: {
+    if (response.ok) {
+      const user: {
         name: string,
         role: string,
         username: string,
         password: string
-      }
-    } = await response.json();
-
-    if (response.ok) {
-      const user = json.user;
+      } = await response.json();
 
       set.password(user.password);
       set.name(user.name);
@@ -191,12 +187,13 @@ const getUser = async (
   });
 }
 
+
 /**
  * 取得使用者清單
  * @param setUsers setUsers
  */
-const getUserList = async (setUsers: (userList: string[]) => void) => {
-  const url = `http://${IP}:${PORT}/api/user/all`;
+const getUserList = async (setUserList: (userList: string[]) => void) => {
+  const url = `http://${IP}:${PORT}/api/user/get/all`;
 
   const requestOptions = {
     method: 'GET',
@@ -206,15 +203,14 @@ const getUserList = async (setUsers: (userList: string[]) => void) => {
   };
 
   fetch(url, requestOptions).then(async (response: Response) => {
-    const json: {
-      users: string[]
-    } = await response.json();
-
     if (response.ok) {
-      setUsers(json.users);
+      const userList: string[] = await response.json();
+
+      setUserList(userList);
     }
   });
 }
+
 
 /**
  * 新增使用者
@@ -242,14 +238,13 @@ const create = async (user: {
     })
   }
 
-  await fetch(url, requestOptions).then(async (response: Response) => {
+  fetch(url, requestOptions).then(async (response: Response) => {
     if (response.ok) {
       toast.success('新增成功!');
-
-      system.reload();
     }
   });
 }
+
 
 /**
  * 修改使用者
@@ -277,11 +272,9 @@ const edit = async (user: {
     })
   }
 
-  await fetch(url, requestOptions).then(async (response: Response) => {
+  fetch(url, requestOptions).then(async (response: Response) => {
     if (response.ok) {
       toast.success('修改成功!');
-
-      system.reload();
     }
   });
 }
@@ -308,15 +301,14 @@ const remove = async (username: string, user: string) => {
   if (username === user) {
     toast.error('刪除失敗，你無法將自己刪除!');
   } else {
-    await fetch(url, requestOptions).then(async (response: Response) => {
+    fetch(url, requestOptions).then(async (response: Response) => {
       if (response.ok) {
         toast.success('刪除成功!');
-
-        system.reload();
       }
     });
   }
 }
+
 
 const user = {
   login,

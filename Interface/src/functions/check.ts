@@ -1,5 +1,6 @@
 import toast from 'react-hot-toast';
 
+
 /**
  * 檢查暱稱
  * @param name 暱稱
@@ -14,6 +15,7 @@ const name = (name: string) => {
     return false;
   }
 }
+
 
 /**
  * 檢查帳號
@@ -30,6 +32,7 @@ const username = (username: string) => {
   }
 }
 
+
 /**
  * 檢查密碼
  * @param password 密碼
@@ -45,10 +48,30 @@ const password = (password: string) => {
   }
 }
 
+
+/**
+ * 檢查 Discord 通知設定
+ * @param channel 頻道編號
+ * @param token 通知權杖
+ * @returns Discord 通知是否符合
+ */
+const discord = (channel: string, token: string) => {
+  if (channel === '' && token === '') {
+    return '';
+  } else if (channel !== '' && token !== '') {
+    return `${channel} ${token}`;
+  } else {
+    toast.error('Discord 通知，須包含頻道編號及通知權杖!');
+
+    return false;
+  }
+}
+
 const check = {
   name,
   username,
-  password
+  password,
+  discord
 }
 
 export default check;

@@ -11,11 +11,11 @@ interface Props {
 }
 
 const GuestGuard = ({ children }: Props) => {
-  const auth = useAuthContext();
-  
+  const { userState } = useAuthContext();
+
   if (localStorage.getItem('access_token')) {
-    if (!auth.user.value.username) {
-      user.get(auth.user.setValue);
+    if (!userState.value.username) {
+      user.get(userState.setValue);
     }
 
     return (
@@ -26,7 +26,10 @@ const GuestGuard = ({ children }: Props) => {
     );
   } else {
     toast.error('請先登入帳號!');
-    return <Navigate to="/login" />;
+
+    return (
+      <Navigate to="/login" />
+    );
   }
 };
 

@@ -12,7 +12,7 @@ interface User {
 }
 
 interface AuthContextProps {
-  user: {
+  userState: {
     value: User;
     setValue: (user: User) => void;
   };
@@ -20,7 +20,7 @@ interface AuthContextProps {
 }
 
 const AuthContext = createContext<AuthContextProps>({
-  user: {
+  userState: {
     value: {
       name: null,
       role: null,
@@ -50,7 +50,7 @@ export const AuthProvider = ({ children }: Props) => {
 
   return (
     <AuthContext.Provider value={{
-      user: {
+      userState: {
         value: user,
         setValue: setUser
       },

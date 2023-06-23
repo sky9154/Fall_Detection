@@ -5,19 +5,82 @@ import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import Grid from '@mui/material/Unstable_Grid2';
 import { H2 } from 'components/Typography';
-import { Added, Edit, Delete } from 'components/Settings/System/UserFrom';
+import { Create, Edit, Remove } from 'components/Settings/System/UserFrom';
 import user from 'api/user';
 
 
 const User: FC = () => {
-  const [openAddedFrom, setOpenAddedFrom] = useState<boolean>(false);
-  const [openEditFrom, setOpenEditFrom] = useState<boolean>(false);
-  const [openDeleteFrom, setOpenDeleteFrom] = useState<boolean>(false);
-  const [users, setUsers] = useState<string[]>([]);
+  const [fromState, setFromState] = useState<{
+    create: boolean;
+    edit: boolean;
+    remove: boolean;
+  }>({
+    create: false,
+    edit: false,
+    remove: false
+  });
+
+  const [userList, setUserList] = useState<string[]>([]);
 
   useEffect(() => {
-    user.getUserList(setUsers);
+    user.getUserList(setUserList);
   }, []);
+
+  const handleOpen = (from: 'create' | 'edit' | 'remove') => {
+    switch (from) {
+      case 'create':
+        setFromState({
+          ...fromState,
+          create: true
+        });
+
+        break;
+      case 'edit':
+        user.getUserList(setUserList);
+
+        setFromState({
+          ...fromState,
+          edit: true
+        });
+
+        break;
+      case 'remove':
+        user.getUserList(setUserList);
+
+        setFromState({
+          ...fromState,
+          remove: true
+        });
+
+        break;
+    }
+  };
+
+  const handleClose = (from: 'create' | 'edit' | 'remove') => {
+    switch (from) {
+      case 'create':
+        setFromState({
+          ...fromState,
+          create: false
+        });
+
+        break;
+      case 'edit':
+        setFromState({
+          ...fromState,
+          edit: false
+        });
+
+        break;
+      case 'remove':
+        setFromState({
+          ...fromState,
+          remove: false
+        });
+
+        break;
+    }
+  };
 
   return (
     <Box
@@ -45,14 +108,14 @@ const User: FC = () => {
               color="inherit"
               fullWidth
               startIcon={<FaUserPlus />}
-              onClick={() => setOpenAddedFrom(true)}
+              onClick={() => handleOpen('create')}
             >
               新增成員
             </Button>
-            <Added
-              open={openAddedFrom}
-              handleClose={() => setOpenAddedFrom(false)}
-              users={users}
+            <Create
+              open={fromState.create}
+              handleClose={() => handleClose('create')}
+              userList={userList}
             />
           </Grid>
           <Grid xs={12} sm={12} md={4}>
@@ -62,14 +125,14 @@ const User: FC = () => {
               color="inherit"
               fullWidth
               startIcon={<FaUserEdit />}
-              onClick={() => setOpenEditFrom(true)}
+              onClick={() => handleOpen('edit')}
             >
               修改成員
             </Button>
             <Edit
-              open={openEditFrom}
-              handleClose={() => setOpenEditFrom(false)}
-              users={users}
+              open={fromState.edit}
+              handleClose={() => handleClose('edit')}
+              userList={userList}
             />
           </Grid>
           <Grid xs={12} sm={12} md={4}>
@@ -79,14 +142,14 @@ const User: FC = () => {
               color="inherit"
               fullWidth
               startIcon={<FaUserMinus />}
-              onClick={() => setOpenDeleteFrom(true)}
+              onClick={() => handleOpen('remove')}
             >
               刪除成員
             </Button>
-            <Delete
-              open={openDeleteFrom}
-              handleClose={() => setOpenDeleteFrom(false)}
-              users={users}
+            <Remove
+              open={fromState.remove}
+              handleClose={() => handleClose('remove')}
+              userList={userList}
             />
           </Grid>
         </Grid>

@@ -7,6 +7,7 @@ import TextField from '@mui/material/TextField';
 import { H2 } from 'components/Typography';
 import SubmitButton from 'components/Settings/SubmitButton';
 import notification from 'api/notification';
+import check from 'functions/check';
 
 
 interface NotificationToken {
@@ -14,23 +15,34 @@ interface NotificationToken {
   discord: string;
 }
 
+interface Discord {
+  channel: string;
+  token: string;
+}
+
 const UpdateNotificationToken: FC = () => {
-  const [notificationToken, setNotificationToken] = useState<NotificationToken>({
-    line: '',
-    discord: ''
-  });
+  const [lineToken, setLineToken] = useState<string>('');
+
+  const [discord, setDiscord] = useState<Discord>({
+    channel: '',
+    token: ''
+  })
 
   const handleChangeLineToken = (event: ChangeEvent<HTMLInputElement>) => {
-    setNotificationToken({
-      ...notificationToken,
-      line: event.target.value
+    setLineToken(event.target.value);
+  }
+
+  const handleChangeDiscordChannel = (event: ChangeEvent<HTMLInputElement>) => {
+    setDiscord({
+      ...discord,
+      channel: event.target.value
     });
   }
 
   const handleChangeDiscordToken = (event: ChangeEvent<HTMLInputElement>) => {
-    setNotificationToken({
-      ...notificationToken,
-      discord: event.target.value
+    setDiscord({
+      ...discord,
+      token: event.target.value
     });
   }
 
@@ -38,16 +50,21 @@ const UpdateNotificationToken: FC = () => {
     event.preventDefault();
 
     const data = new FormData(event.currentTarget);
-    const line = data.get('lineToken') || '';
-    const discord = data.get('discordToken') || '';
+    const line = data.get('lineToken') as string || '';
+    const discordChannel = data.get('discordChannel') as string || '';
+    const discordToken = data.get('discordToken') as string || '';
 
-    await notification.update(line as string, discord as string);
+    const discord: string | boolean = check.discord(discordChannel, discordToken);
+    
+    if (discord) {
+      await notification.update(line, discord as string);
+    }
   }
 
   useEffect(() => {
-    notification.get(setNotificationToken);
+    notification.get(setLineToken, setDiscord);
   }, []);
-  
+
   return (
     <Box
       component="form"
@@ -72,7 +89,7 @@ const UpdateNotificationToken: FC = () => {
           name="lineToken"
           label="Line Token"
           variant="outlined"
-          value={notificationToken.line}
+          value={lineToken}
           fullWidth
           onChange={handleChangeLineToken}
           InputProps={{
@@ -84,11 +101,27 @@ const UpdateNotificationToken: FC = () => {
           }}
         />
         <TextField
+          id="discordChannel"
+          name="discordChannel"
+          label="Discord Channel"
+          variant="outlined"
+          value={discord.channel}
+          fullWidth
+          onChange={handleChangeDiscordChannel}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <FaDiscord style={{ fontSize: '24px' }} />
+              </InputAdornment>
+            )
+          }}
+        />
+        <TextField
           id="discordToken"
           name="discordToken"
           label="Discord Token"
           variant="outlined"
-          value={notificationToken.discord}
+          value={discord.token}
           fullWidth
           onChange={handleChangeDiscordToken}
           InputProps={{

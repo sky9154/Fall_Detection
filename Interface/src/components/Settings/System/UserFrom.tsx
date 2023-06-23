@@ -15,10 +15,10 @@ import check from 'functions/check';
 type UserFromProps = {
   open: boolean;
   handleClose: () => void;
-  users: string[];
+  userList: string[];
 }
 
-export const Added: FC<UserFromProps> = ({ open, handleClose }) => {
+export const Create: FC<UserFromProps> = ({ open, handleClose }) => {
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
@@ -124,7 +124,7 @@ export const Added: FC<UserFromProps> = ({ open, handleClose }) => {
   );
 }
 
-export const Edit: FC<UserFromProps> = ({ open, handleClose, users }) => {
+export const Edit: FC<UserFromProps> = ({ open, handleClose, userList }) => {
   const [username, setUsername] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [name, setName] = useState<string>('');
@@ -167,12 +167,12 @@ export const Edit: FC<UserFromProps> = ({ open, handleClose, users }) => {
 
   return (
     <Dialog open={open} onClose={() => {
-      handleClose();
-
       setUsername('');
       setPassword('');
       setName('');
       setRole('user');
+
+      handleClose();
     }}>
       <Box
         component="form"
@@ -193,7 +193,7 @@ export const Edit: FC<UserFromProps> = ({ open, handleClose, users }) => {
           <H2>修改成員</H2>
           <Autocomplete
             id="username"
-            options={users}
+            options={userList}
             noOptionsText="沒有此成員"
             disableClearable
             fullWidth
@@ -275,8 +275,8 @@ export const Edit: FC<UserFromProps> = ({ open, handleClose, users }) => {
   );
 }
 
-export const Delete: FC<UserFromProps> = ({ open, handleClose, users }) => {
-  const auth = useAuthContext();
+export const Remove: FC<UserFromProps> = ({ open, handleClose, userList }) => {
+  const { userState } = useAuthContext();
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -285,7 +285,7 @@ export const Delete: FC<UserFromProps> = ({ open, handleClose, users }) => {
     const username = data.get('username');
 
     if (username) {
-      await user.remove(username as string, auth.user.value.username as string);
+      await user.remove(username as string, userState.value.username as string);
 
       handleClose();
     };
@@ -313,7 +313,7 @@ export const Delete: FC<UserFromProps> = ({ open, handleClose, users }) => {
           <Autocomplete
             id="username"
             fullWidth
-            options={users}
+            options={userList}
             noOptionsText="沒有此成員"
             disableClearable
             renderInput={(params) => (
