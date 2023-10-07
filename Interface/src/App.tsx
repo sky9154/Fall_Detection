@@ -3,6 +3,7 @@ import { useRoutes } from 'react-router-dom';
 import routes from 'routes';
 import { Toaster } from 'react-hot-toast';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
+import { zhTW as gridZhTW } from '@mui/x-data-grid';
 import { AuthProvider } from 'context/AuthContext';
 
 
@@ -11,10 +12,12 @@ const theme = createTheme({
     fontFamily: [
       'Noto Sans TC',
       'Roboto',
-      'sans-serif',
+      'sans-serif'
     ].join(',')
   }
-});
+},
+  gridZhTW
+);
 
 const App: FC = () => {
   const allPages = useRoutes(routes);

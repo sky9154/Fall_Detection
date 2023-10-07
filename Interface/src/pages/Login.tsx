@@ -22,12 +22,14 @@ import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import { H1 } from 'components/Typography';
 import user from 'api/user';
+import { useAuthContext } from 'context/AuthContext';
 
 
 const theme = createTheme();
 
 const Login: FC = () => {
   const navigate = useNavigate();
+  const { userState } = useAuthContext();
 
   const [showPassword, setShowPassword] = useState<boolean>(false);
 
@@ -45,6 +47,7 @@ const Login: FC = () => {
     if (username && password) {
       user.login(
         navigate,
+        userState.setValue,
         username as string,
         password as string
       );

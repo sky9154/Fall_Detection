@@ -2,7 +2,6 @@ import { FC, lazy, LazyExoticComponent, Suspense } from 'react';
 import LoadingScreen from 'components/LoadingScreen';
 import GuestGuard from 'components/Authentication/GuestGuard';
 import AdminGuard from 'components/Authentication/AdminGuard';
-import { HomeProvider } from 'context/HomeContext';
 
 
 const loadable = (Component: LazyExoticComponent<FC>) => (props: any) => (
@@ -11,10 +10,11 @@ const loadable = (Component: LazyExoticComponent<FC>) => (props: any) => (
   </Suspense>
 );
 
-const Home = loadable(lazy(() => import('pages/Home')));
-const Login = loadable(lazy(() => import('pages/Authentication/Login')));
-const Account = loadable(lazy(() => import('pages/Account')));
-const System = loadable(lazy(() => import('pages/System')));
+const Detection = loadable(lazy(() => import('pages/Detection')));
+const DeviceGrid = loadable(lazy(() => import('pages/DeviceGrid')));
+const Login = loadable(lazy(() => import('pages/Login')));
+const Account = loadable(lazy(() => import('pages/Settings/Account')));
+const System = loadable(lazy(() => import('pages/Settings/System')));
 const Error = loadable(lazy(() => import('pages/404')));
 
 const routes = [
@@ -23,22 +23,18 @@ const routes = [
     path: '/',
     element: (
       <GuestGuard>
-        <HomeProvider>
-          <Home />
-        </HomeProvider>
+        <DeviceGrid />
       </GuestGuard>
     )
   }, {
     path: '/login',
     element: <Login />
   }, {
-    path: '/home',
+    path: '/detection',
     element: (
       <GuestGuard>
-        <HomeProvider>
-          <Home />
-        </HomeProvider>
-      </GuestGuard >
+        <Detection />
+      </GuestGuard>
     )
   }, {
     path: '/account',

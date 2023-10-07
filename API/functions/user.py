@@ -6,7 +6,7 @@ async def get_all () -> list:
   取得所有使用者資料
   '''
 
-  results = await mongodb.find('Users', { })
+  results = await mongodb.find('User', { })
 
   return results
 
@@ -16,7 +16,7 @@ async def get (username: str) -> dict:
   取得使用者資料
   '''
   
-  result = await mongodb.find('Users', { 'username': username })
+  result = await mongodb.find('User', { 'username': username })
   
   return result[0]
 
@@ -26,7 +26,7 @@ async def existence (username: str) -> bool:
   檢查使用者是否存在
   '''
 
-  result = await mongodb.find('Users', {'username': username})
+  result = await mongodb.find('User', {'username': username})
 
   return len(result) != 0
 
@@ -36,7 +36,7 @@ async def create (user: dict):
   建立使用者
   '''
 
-  await mongodb.insert('Users', user)
+  await mongodb.insert('User', user)
 
 
 async def delete (username: str):
@@ -44,7 +44,7 @@ async def delete (username: str):
   刪除使用者
   '''
 
-  await mongodb.delete('Users', {'username': username})
+  await mongodb.delete('User', {'username': username})
 
 
 async def update_name (username: str, name: str):
@@ -52,7 +52,7 @@ async def update_name (username: str, name: str):
   修改暱稱
   '''
 
-  await mongodb.update('Users', { 
+  await mongodb.update('User', { 
     'username': username 
   }, {
     '$set': {
@@ -66,7 +66,7 @@ async def update_password (username: str, password: str):
   修改密碼
   '''
 
-  await mongodb.update('Users', { 
+  await mongodb.update('User', { 
     'username': username 
   }, { 
     '$set': {
@@ -80,7 +80,7 @@ async def update_user (username: str, user: dict):
   修改使用者資料
   '''
 
-  await mongodb.update('Users', { 
+  await mongodb.update('User', { 
     'username': username 
   }, { 
     '$set': user

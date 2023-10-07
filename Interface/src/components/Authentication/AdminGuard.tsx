@@ -3,7 +3,6 @@ import { Navigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { useAuthContext } from 'context/AuthContext';
 import DashboardNavbar from 'components/Layouts/DashboardNavbar';
-import user from 'api/user';
 
 
 interface Props {
@@ -13,11 +12,7 @@ interface Props {
 const GuestGuard = ({ children }: Props) => {
   const { userState } = useAuthContext();
 
-  if (localStorage.getItem('access_token')) {
-    if (!userState.value.username) {
-      user.get(userState.setValue);
-    }
-
+  if (userState.value.role) {
     if (userState.value.role === 'admin') {
       return (
         <Fragment>

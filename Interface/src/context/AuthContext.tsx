@@ -9,6 +9,7 @@ interface User {
   name: string | null;
   role: string | null;
   username: string | null;
+  token: string | null;
 }
 
 interface AuthContextProps {
@@ -24,7 +25,8 @@ const AuthContext = createContext<AuthContextProps>({
     value: {
       name: null,
       role: null,
-      username: null
+      username: null,
+      token: null
     },
     setValue: () => { }
   },
@@ -35,14 +37,16 @@ export const AuthProvider = ({ children }: Props) => {
   const [user, setUser] = useState<User>({
     name: null,
     role: null,
-    username: null
+    username: null,
+    token: null
   });
 
   const handleLogout = () => {
     setUser({
       name: null,
       role: null,
-      username: null
+      username: null,
+      token: null
     });
 
     localStorage.removeItem('access_token');

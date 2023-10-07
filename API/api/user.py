@@ -1,24 +1,29 @@
 from fastapi import APIRouter, Depends, HTTPException, Form
-from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.responses import JSONResponse, FileResponse
 from bson import ObjectId
 from functions import token, user
+import json
 import os
 
 
 router = APIRouter()
 
 @router.post('/login')
-async def login (credentials: OAuth2PasswordRequestForm = Depends()):
-  result = await user.get(credentials.username)
+async def login (user_data: dict):
+  if await user.existence(user_data['username']):
+    result = await user.get(user_data['username'])
 
-  if not result or result['password'] != credentials.password:
-    raise HTTPException(401, 'Incorrect username or password')
+    if result['password'] != user_data['password']:
+      raise HTTPException(401, 'Incorrect password')
 
-  return JSONResponse(content = { 
-    'access_token': token.generate(result),
-    'token_type': 'bearer' 
-  })
+    raise HTTPException(200, { 
+      'name': result['name'],
+      'role': result['role'],
+      'username': result['username'],
+      'token': token.generate(result)
+    })
+  else:
+    raise HTTPException(400, 'Invalid username')
 
 
 @router.get('/get/token')

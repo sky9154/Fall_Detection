@@ -1,16 +1,11 @@
 import toast from 'react-hot-toast';
-import system from 'functions/system';
 
-
-interface AccessToken {
-  access_token: string,
-  token_type: string
-}
 
 interface User {
   name: string | null;
   role: string | null;
   username: string | null;
+  token: string | null;
 }
 
 const IP = process.env.REACT_APP_IP;
@@ -23,8 +18,9 @@ const token = localStorage.getItem('access_token');
  * @param username 帳號
  * @param password 密碼
  */
-const login = async (
+const login = (
   navigate: (link: string) => void,
+  setUser: (user: User) => void,
   username: string,
   password: string
 ) => {
@@ -33,36 +29,44 @@ const login = async (
   const requestOptions = {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/x-www-form-urlencoded'
+      'Content-Type': 'application/json'
     },
-    body: new URLSearchParams({
+    body: JSON.stringify({
       'username': username,
       'password': password
     })
   };
 
-  fetch(url, requestOptions).then(async (response: Response) => {
-    const json: AccessToken = await response.json();
+  fetch(url, requestOptions)
+    .then((response: Response) => {
+      switch (response.status) {
+        case 200:
+          toast.success('登入成功');
 
-    if (response.ok) {
-      toast.success('登入成功');
+          return response.json();
+        case 400:
+          toast.error('使用者不存在!');
 
-      localStorage.setItem('access_token', json.access_token);
+          break;
+        case 401:
+          toast.error('密碼錯誤!');
 
-      navigate('/home');
+          break;
+      }
+    })
+    .then((data) => {
+      if (data) {
+        setUser(data.detail);
 
-      system.reload();
-    } else if (response.status === 401) {
-      toast.error('帳號或密碼錯誤!')
-    }
-  });
+        navigate('/');
+      }
+    })
 }
 
 
 /**
  * 修改暱稱
  * @param name 暱稱
- * @param user user
  */
 const updateName = async (name: string) => {
   const url = `http://${IP}:${PORT}/api/user/update/name`;
@@ -116,10 +120,10 @@ const updatePasswoed = async (oldPassword: string, newPassword: string) => {
 
 /**
  * 取得使用者資料
- * @param setValue setValue
+ * @param setUser 設定使用者資料
  */
 const get = async (
-  user: (user: {
+  setUser: (user: {
     name: string,
     role: string,
     username: string
@@ -138,7 +142,7 @@ const get = async (
       if (response.ok) {
         const json: User = await response.json();
 
-        user({
+        setUser({
           name: json.name as string,
           role: json.role as string,
           username: json.username as string
@@ -152,7 +156,7 @@ const get = async (
 /**
  * 取得使用者
  * @param username 帳號
- * @param set 設定
+ * @param set 設定使用者資料
  */
 const getUser = async (
   username: string,
@@ -190,7 +194,7 @@ const getUser = async (
 
 /**
  * 取得使用者清單
- * @param setUsers setUsers
+ * @param setUserList 設定使用者清單
  */
 const getUserList = async (setUserList: (userList: string[]) => void) => {
   const url = `http://${IP}:${PORT}/api/user/get/all`;
@@ -214,7 +218,7 @@ const getUserList = async (setUserList: (userList: string[]) => void) => {
 
 /**
  * 新增使用者
- * @param user User
+ * @param user 使用者資料
  */
 const create = async (user: {
   username: string,
@@ -248,7 +252,7 @@ const create = async (user: {
 
 /**
  * 修改使用者
- * @param user User
+ * @param user 使用者資料
  */
 const edit = async (user: {
   username: string,
@@ -284,7 +288,7 @@ const edit = async (user: {
  * 刪除使用者
  * @param username 帳號
  */
-const remove = async (username: string, user: string) => {
+const remove = async (username: string) => {
   const url = `http://${IP}:${PORT}/api/user/delete`;
 
   const requestOptions = {
@@ -298,15 +302,11 @@ const remove = async (username: string, user: string) => {
     })
   }
 
-  if (username === user) {
-    toast.error('刪除失敗，你無法將自己刪除!');
-  } else {
-    fetch(url, requestOptions).then(async (response: Response) => {
-      if (response.ok) {
-        toast.success('刪除成功!');
-      }
-    });
-  }
+  fetch(url, requestOptions).then(async (response: Response) => {
+    if (response.ok) {
+      toast.success('刪除成功!');
+    }
+  });
 }
 
 
