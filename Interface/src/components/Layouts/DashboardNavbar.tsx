@@ -16,7 +16,6 @@ import useScrollTrigger from '@mui/material/useScrollTrigger';
 import { H2 } from 'components/Typography';
 import { useAuthContext } from 'context/AuthContext';
 import { Name, MenuList } from 'assets/data';
-import system from 'functions/system';
 
 
 interface Props {
@@ -52,12 +51,8 @@ const DashboardNavbar: FC = (props: any) => {
       switch (key) {
         case 'logout':
           handleLogout();
-
           toast.success('登出成功');
-
           navigate('/login');
-
-          system.reload();
 
           break;
         case 'system':
@@ -92,7 +87,7 @@ const DashboardNavbar: FC = (props: any) => {
               }}
             >
               <Link
-                to="/home"
+                to="/"
                 style={{
                   textDecoration: 'none',
                   color: '#FFF',

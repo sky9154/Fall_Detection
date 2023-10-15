@@ -1,5 +1,4 @@
 import { FC, FormEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
 import Box from '@mui/material/Box';
 import OutlinedInput from '@mui/material/OutlinedInput';
 import Stack from '@mui/material/Stack';
@@ -11,8 +10,7 @@ import user from 'api/user';
 
 
 const UpdateName: FC = () => {
-  const { userState, handleLogout } = useAuthContext();
-  const navigate = useNavigate();
+  const { userState } = useAuthContext();
 
   const updateName = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -22,13 +20,7 @@ const UpdateName: FC = () => {
 
     if (name) {
       if (check.name(name as string)) {
-        await user.updateName(name as string).then(() => {
-          setTimeout(() => {
-            handleLogout();
-  
-            navigate('/login');
-          }, 800);
-        });
+        user.updateName(userState, name as string);
       }
     }
   }

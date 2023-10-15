@@ -1,8 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Form
 from fastapi.responses import JSONResponse, FileResponse
-from bson import ObjectId
 from functions import token, user
-import json
 import os
 
 
@@ -35,7 +33,7 @@ async def get_token (token_payload: dict = Depends(token.get)):
 async def get_avatar (username: str):
   if user.check_username(username):
     image = f'temp/avatar/{username}.png'
-    
+
     if os.path.isfile(image):
       return FileResponse(image, media_type='image/jpeg')
   else:
@@ -55,7 +53,7 @@ async def get_username (token_payload: dict = Depends(token.get), username: str 
       raise HTTPException(400, 'Invalid username')
   else:
     raise HTTPException(403, 'User does not have permission')
-  
+
 
 @router.get('/get/all')
 async def get_all (token_payload: dict = Depends(token.get)):
@@ -75,36 +73,35 @@ async def get_all (token_payload: dict = Depends(token.get)):
 @router.put('/update/name')
 async def update_name (
   token_payload: dict = Depends(token.get),
-  new_name: str = Form(...)
+  name: dict = { 'new_name': None }
 ):
   username = token_payload['username']
   existence = await user.existence(username)
 
   if existence:
     if user.check_name(username):
-      await user.update_name(username, new_name.strip())
+      await user.update_name(username, name['new_name'].strip())
 
       raise HTTPException(201, 'Name updated successfully')
     else:
       raise HTTPException(400, 'Invalid name')
   else:
     raise HTTPException(404, 'User not found')
-  
+
 
 @router.put('/update/password')
 async def update_password (
   token_payload: dict = Depends(token.get),
-  old_password: str = Form(...),
-  new_password: str = Form(...)
+  password: dict = { 'old': None, 'new': None }
 ):
   username = token_payload['username']
   existence = await user.existence(username)
 
   if existence:
     result = await user.get(username)
-    
-    old_password = old_password.strip()
-    new_password = new_password.strip()
+
+    old_password = password['old'].strip()
+    new_password = password['new'].strip()
 
     if old_password == result['password'] and user.check_password(new_password):
       await user.update_password(username, new_password)
@@ -114,7 +111,7 @@ async def update_password (
       raise HTTPException(400, 'Invalid password')
   else:
     raise HTTPException(404, 'User not found')
-  
+
 
 @router.post('/create')
 async def create (
@@ -139,20 +136,17 @@ async def create (
     else:
       if not user.check_name(name):
         raise HTTPException(400, 'Invalid name')
-      
+
       if not user.check_username(username):
         raise HTTPException(400, 'Invalid username')
-      
+
       if not user.check_password(password):
         raise HTTPException(400, 'Invalid password')
-      
+
       if role not in ['user', 'admin']:
         raise HTTPException(400, 'Invalid role')
-      
-      object_id = ObjectId()
 
       await user.create({
-        '_id': object_id,
         'name': name,
         'role': role,
         'username': username,
@@ -188,15 +182,15 @@ async def edit (
 
       if not user.check_username(username):
         raise HTTPException(400, 'Invalid username')
-      
+
       if not user.check_password(password):
         raise HTTPException(400, 'Invalid password')
-      
+
       if role not in ['user', 'admin']:
         raise HTTPException(400, 'Invalid role')
 
       result = await user.get(username)
-    
+
       await user.update_user(result['username'], {
         'name': name,
         'role': role,
@@ -209,7 +203,7 @@ async def edit (
       raise HTTPException(400, 'User does not exist')
   else:
     raise HTTPException(403, 'User does not have permission')
-  
+
 
 @router.delete('/delete')
 async def delete (
@@ -220,13 +214,13 @@ async def delete (
 
   if user.check_role(user_role):
     existence = await user.existence(username)
-    
+
     username = username.strip()
 
     if existence:
       if not user.check_username(username):
         raise HTTPException(400, 'Invalid username')
-      
+
       await user.delete(username)
 
       raise HTTPException(201, 'User deleted successfully')

@@ -48,8 +48,6 @@ export const AuthProvider = ({ children }: Props) => {
       username: null,
       token: null
     });
-
-    localStorage.removeItem('access_token');
   };
 
   return (

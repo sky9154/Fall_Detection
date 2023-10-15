@@ -66,25 +66,36 @@ const login = (
 
 /**
  * 修改暱稱
+ * @param userState userState
  * @param name 暱稱
  */
-const updateName = async (name: string) => {
+const updateName = (
+  userState: {
+    value: User;
+    setValue: (user: User) => void;
+  },
+  name: string
+) => {
   const url = `http://${IP}:${PORT}/api/user/update/name`;
 
   const requestOptions = {
     method: 'PUT',
     headers: {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/x-www-form-urlencoded'
+      'Authorization': `Bearer ${userState.value.token}`,
+      'Content-Type': 'application/json'
     },
-    body: new URLSearchParams({
+    body: JSON.stringify({
       'new_name': name
     })
   };
 
-  fetch(url, requestOptions).then(async (response: Response) => {
+  fetch(url, requestOptions).then((response: Response) => {
     if (response.ok) {
-      toast.success('更改成功，請重新登入!');
+      toast.success('更改成功!');
+      userState.setValue({
+        ...userState.value,
+        name: name
+      })
     }
   });
 }
@@ -92,27 +103,38 @@ const updateName = async (name: string) => {
 
 /**
  * 修改密碼
- * @param oldPassword 舊密碼
- * @param newPassword 新密碼
+ * @param userState userState
+ * @param password 密碼
  */
-const updatePasswoed = async (oldPassword: string, newPassword: string) => {
+const updatePasswoed = (
+  userState: {
+    value: User;
+    setValue: (user: User) => void;
+  },
+  password: {
+    old: string,
+    new: string
+  }
+) => {
   const url = `http://${IP}:${PORT}/api/user/update/password`;
 
   const requestOptions = {
     method: 'PUT',
     headers: {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/x-www-form-urlencoded'
+      'Authorization': `Bearer ${userState.value.token}`,
+      'Content-Type': 'application/json'
     },
-    body: new URLSearchParams({
-      'old_password': oldPassword,
-      'new_password': newPassword
+    body: JSON.stringify({
+      'old': password.old,
+      'new': password.new
     })
   };
 
-  fetch(url, requestOptions).then(async (response: Response) => {
+  fetch(url, requestOptions).then((response: Response) => {
     if (response.ok) {
-      toast.success('更改成功!，請重新登入!');
+      toast.success('更改成功!');
+    } else if (response.status === 400) {
+      toast.success('目前密碼不正確!');
     }
   });
 }

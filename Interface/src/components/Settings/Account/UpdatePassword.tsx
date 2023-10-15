@@ -1,5 +1,4 @@
 import { FC, useState, FormEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
 import Box from '@mui/material/Box';
 import OutlinedInput from '@mui/material/OutlinedInput';
 import Stack from '@mui/material/Stack';
@@ -13,8 +12,7 @@ import user from 'api/user';
 
 
 const UpdatePassword: FC = () => {
-  const { userState, handleLogout } = useAuthContext();
-  const navigate = useNavigate();
+  const { userState } = useAuthContext();
 
   const [showPassword, setShowPassword] = useState<{
     old: boolean,
@@ -66,7 +64,7 @@ const UpdatePassword: FC = () => {
     }
   }
 
-  const updatePassword = async (event: FormEvent<HTMLFormElement>) => {
+  const updatePassword = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     const data = new FormData(event.currentTarget);
@@ -74,14 +72,13 @@ const UpdatePassword: FC = () => {
     const newPassword = data.get('newPassword');
 
     if (oldPassword && newPassword && !passwordState) {
-      if (check.password(newPassword as string)) {
-        await user.updatePasswoed(oldPassword as string, newPassword as string).then(() => {
-          setTimeout(() => {
-            handleLogout();
+      const password = {
+        old: oldPassword as string,
+        new: newPassword as string
+      }
 
-            navigate('/login');
-          }, 800);
-        });
+      if (check.password(newPassword as string)) {
+        user.updatePasswoed(userState, password);
       }
     }
   }
