@@ -4,10 +4,8 @@ from functions import detection
 
 router = APIRouter()
 
-@router.websocket('/camera/{camera_id}')
+@router.websocket('/{camera_id}')
 async def stream (websocket: WebSocket, camera_id: str, draw: bool, response: Response):
-  response.headers['x-content-type-options'] = 'nosniff'
-
   try:
     await websocket.accept()
 

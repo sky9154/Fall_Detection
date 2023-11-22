@@ -25,7 +25,8 @@ def create_app ():
 app = create_app()
 
 app.include_router(api.Contact, prefix='/api/contact')
-app.include_router(api.Detection, prefix='/ws/stream')
+app.include_router(api.Detection, prefix='/ws/detection')
+app.include_router(api.Device, prefix='/api/device')
 app.include_router(api.Notification, prefix='/api/notification')
 app.include_router(api.User, prefix='/api/user')
 

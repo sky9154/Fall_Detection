@@ -2,6 +2,7 @@ import { FC, lazy, LazyExoticComponent, Suspense } from 'react';
 import LoadingScreen from 'components/LoadingScreen';
 import GuestGuard from 'components/Authentication/GuestGuard';
 import AdminGuard from 'components/Authentication/AdminGuard';
+import { CameraProvider } from 'context/CameraContext';
 
 
 const loadable = (Component: LazyExoticComponent<FC>) => (props: any) => (
@@ -11,7 +12,7 @@ const loadable = (Component: LazyExoticComponent<FC>) => (props: any) => (
 );
 
 const Detection = loadable(lazy(() => import('pages/Detection')));
-const DeviceGrid = loadable(lazy(() => import('pages/DeviceGrid')));
+const Home = loadable(lazy(() => import('pages/Home')));
 const Login = loadable(lazy(() => import('pages/Login')));
 const Account = loadable(lazy(() => import('pages/Settings/Account')));
 const System = loadable(lazy(() => import('pages/Settings/System')));
@@ -23,17 +24,19 @@ const routes = [
     path: '/',
     element: (
       <GuestGuard>
-        <DeviceGrid />
+        <Home />
       </GuestGuard>
     )
   }, {
     path: '/login',
     element: <Login />
   }, {
-    path: '/detection',
+    path: '/detection/:cameraId',
     element: (
       <GuestGuard>
-        <Detection />
+        <CameraProvider>
+          <Detection />
+        </CameraProvider>
       </GuestGuard>
     )
   }, {

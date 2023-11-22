@@ -1,4 +1,5 @@
 from .user import router as User
+from .device import router as Device
 from .detection import router as Detection
 from .contact import router as Contact
 from .notification import router as Notification

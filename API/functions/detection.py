@@ -88,8 +88,10 @@ async def stream (websocket: WebSocket, camera_id: str, draw: bool):
     )
 
   match camera_id:
-    case 'test':
+    case 'demo1':
       cap = cv2.VideoCapture('video/fall.mp4')
+    case 'demo2':
+      cap = cv2.VideoCapture('video/walk.mp4')
     case 'esp32':
       CAMERA_IP = os.getenv('CAMERA_IP')
 
