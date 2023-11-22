@@ -7,7 +7,7 @@ import {
 } from 'react-icons/fa';
 import IconButton from '@mui/material/IconButton';
 import Stack from '@mui/material/Stack';
-import { useCameraContext } from 'context/Home/CameraContext';
+import { useCameraContext } from 'context/CameraContext';
 
 
 type OperationToggleButtonProps = {

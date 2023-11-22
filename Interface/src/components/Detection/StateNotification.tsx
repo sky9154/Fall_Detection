@@ -1,7 +1,7 @@
 import { FC } from 'react';
 import Alert from '@mui/material/Alert';
 import AlertTitle from '@mui/material/AlertTitle';
-import { useCameraContext } from 'context/Home/CameraContext';
+import { useCameraContext } from 'context/CameraContext';
 
 
 const StateNotification: FC = () => {

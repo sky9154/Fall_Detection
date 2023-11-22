@@ -5,7 +5,7 @@ interface Props {
   children: ReactNode;
 }
 
-interface User {
+type UserType = {
   name: string | null;
   role: string | null;
   username: string | null;
@@ -14,8 +14,8 @@ interface User {
 
 interface AuthContextProps {
   userState: {
-    value: User;
-    setValue: (user: User) => void;
+    value: UserType;
+    setValue: (user: UserType) => void;
   };
   handleLogout: () => void;
 }
@@ -34,7 +34,7 @@ const AuthContext = createContext<AuthContextProps>({
 });
 
 export const AuthProvider = ({ children }: Props) => {
-  const [user, setUser] = useState<User>({
+  const [user, setUser] = useState<UserType>({
     name: null,
     role: null,
     username: null,

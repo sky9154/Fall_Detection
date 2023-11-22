@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Form
 from fastapi.responses import JSONResponse
 from functions import token, notification, user, sensor
 
+
 router = APIRouter()
 
 @router.get('/get/token')
@@ -62,4 +63,3 @@ async def send (token_payload: dict = Depends(token.get)):
     print('INFO:     Discord 圖片已發送！')
   else:
     print(f'ERROR:    Discord {response.status_code}')
-    

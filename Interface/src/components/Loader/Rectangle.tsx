@@ -1,12 +1,10 @@
-import { FC } from 'react';
-import Box from '@mui/material/Box';
 import { styled, createTheme } from '@mui/material/styles';
-import { useCameraContext } from 'context/Home/CameraContext';
+import Box from '@mui/material/Box';
 
 
 const theme = createTheme();
 
-const Loader = styled(Box)(() => ({
+const Rectangle = styled(Box)(() => ({
   boxShadow: '0 0 0 7px #42A5F5, inset 0 0 0 1px #42A5F5',
   position: 'relative',
   borderRadius: '8px',
@@ -54,36 +52,4 @@ const Loader = styled(Box)(() => ({
   }
 }));
 
-const CameraScreen: FC = () => {
-  const { isLoading, cameraFrame } = useCameraContext();
-
-  return (
-    <Box
-      position="relative"
-      display="flex"
-      alignItems="stretch"
-    >
-      <Box
-        position="absolute"
-        display={(isLoading.value) ? "flex" : "none"}
-        justifyContent="center"
-        alignItems="center"
-        height="100%"
-        width="100%"
-      >
-        <Loader />
-      </Box>
-      <img
-        src={cameraFrame.value}
-        alt={(cameraFrame.value) ? "video" : "Loading"}
-        style={{
-          width: '100%',
-          borderRadius: 16,
-          boxShadow: '0 4px 8px 0 #BDC9D7'
-        }}
-      />
-    </Box>
-  );
-}
-
-export default CameraScreen;
+export default Rectangle;

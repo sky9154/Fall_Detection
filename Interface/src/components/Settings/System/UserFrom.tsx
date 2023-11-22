@@ -6,19 +6,21 @@ import Dialog from '@mui/material/Dialog';
 import MenuItem from '@mui/material/MenuItem';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
-import { useAuthContext } from 'context/AuthContext';
 import { H2 } from 'components/Typography';
 import user from 'api/user';
 import check from 'functions/check';
+import { useAuthContext } from 'context/AuthContext';
 
 
-type UserFromProps = {
+interface UserFromProps {
   open: boolean;
   handleClose: () => void;
   userList: string[];
 }
 
 export const Create: FC<UserFromProps> = ({ open, handleClose }) => {
+  const { userState } = useAuthContext();
+
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
@@ -41,7 +43,7 @@ export const Create: FC<UserFromProps> = ({ open, handleClose }) => {
         check.password(createUser.password) &&
         check.name(createUser.name)
       ) {
-        await user.create(createUser);
+        user.create(userState.value.token as string, createUser);
 
         handleClose();
       }
@@ -125,24 +127,29 @@ export const Create: FC<UserFromProps> = ({ open, handleClose }) => {
 }
 
 export const Edit: FC<UserFromProps> = ({ open, handleClose, userList }) => {
+  const { userState } = useAuthContext();
+
   const [username, setUsername] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [name, setName] = useState<string>('');
   const [role, setRole] = useState<string>('user');
 
-  const handleUsername = async (event: any, inputUsername: string) => {
+  const handleUsername = (event: any, inputUsername: string) => {
     if (inputUsername) {
-      await user.getUser(inputUsername, {
-        password: setPassword,
-        name: setName,
-        role: setRole
-      });
+      user.getUser(
+        userState.value.token as string,
+        inputUsername, {
+          password: setPassword,
+          name: setName,
+          role: setRole
+        }
+      );
 
       setUsername(inputUsername);
     }
   }
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     if (username && password && name && role) {
@@ -158,8 +165,8 @@ export const Edit: FC<UserFromProps> = ({ open, handleClose, userList }) => {
         check.password(editUser.password) &&
         check.name(editUser.name)
       ) {
-        await user.edit(editUser);
-        
+        user.edit(userState.value.token as string, editUser);
+
         handleClose();
       }
     };
@@ -285,7 +292,7 @@ export const Remove: FC<UserFromProps> = ({ open, handleClose, userList }) => {
     const username = data.get('username');
 
     if (username) {
-      await user.remove(username as string, userState.value.username as string);
+      user.remove(userState.value.token as string, username as string);
 
       handleClose();
     };

@@ -1,6 +1,4 @@
 import toast from 'react-hot-toast';
-import { NetworkAddress } from 'assets/data';
-import system from 'functions/system';
 
 
 interface NotificationToken {
@@ -8,16 +6,24 @@ interface NotificationToken {
   discord: string;
 }
 
-const ip = NetworkAddress.ip;
-const port = NetworkAddress.port;
-const token = localStorage.getItem('access_token');
+const IP = process.env.REACT_APP_IP;
+const PORT = process.env.REACT_APP_PORT;
 
 /**
  * 取得通知 Token
- * @param setNotificationToken setNotificationToken
+ * @param token Token
+ * @param line 設定 Line Notify Token
+ * @param discord 設定 Discord Token
  */
-const get = async (setNotificationToken: (data: NotificationToken) => void) => {
-  const url = `http://${ip}:${port}/api/notification/token`;
+const get = (
+  token: string,
+  line: (token: string) => void,
+  discord: (discord: {
+    channel: string,
+    token: string
+  }) => void
+) => {
+  const url = `http://${IP}:${PORT}/api/notification/get/token`;
 
   const requestOptions = {
     method: 'GET',
@@ -27,24 +33,37 @@ const get = async (setNotificationToken: (data: NotificationToken) => void) => {
   };
 
   fetch(url, requestOptions).then(async (response: Response) => {
-    const json: NotificationToken = await response.json();
 
     if (response.ok) {
-      setNotificationToken({
-        line: json.line,
-        discord: json.discord
+      const notification: NotificationToken = await response.json();
+      const discordData = notification.discord.split(' ');
+
+      line(notification.line);
+
+      discord((discordData.length < 2) ? {
+        channel: '',
+        token: ''
+      } : {
+        channel: discordData[0],
+        token: discordData[1]
       });
     }
   });
 }
 
+
 /**
  * 更新通知 Token
+ * @param token Token
  * @param line Line Notify Token
  * @param discord Discord Token
  */
-const update = async (line: string, discord: string) => {
-  const url = `http://${ip}:${port}/api/update/notification/token`;
+const update = (
+  token: string,
+  line: string,
+  discord: string
+) => {
+  const url = `http://${IP}:${PORT}/api/notification/update/token`;
 
   const requestOptions = {
     method: 'PUT',
@@ -58,20 +77,20 @@ const update = async (line: string, discord: string) => {
     })
   };
 
-  await fetch(url, requestOptions).then(async (response: Response) => {
+  fetch(url, requestOptions).then(async (response: Response) => {
     if (response.ok) {
       toast.success('更改成功!');
-
-      system.reload();
     }
   });
 }
 
+
 /**
- * 發送 Line Notify
+ * 發送狀態通知
+ * @param token Token
  */
-const lineNotify = async () => {
-  const url = `http://${ip}:${port}/api/notification/send`;
+const sendNotify = (token: string) => {
+  const url = `http://${IP}:${PORT}/api/notification/send`;
 
   const requestOptions = {
     method: 'POST',
@@ -83,10 +102,10 @@ const lineNotify = async () => {
   fetch(url, requestOptions);
 }
 
-const notification = {
+const Notification = {
   get,
   update,
-  lineNotify
+  sendNotify
 }
 
-export default notification;
+export default Notification;

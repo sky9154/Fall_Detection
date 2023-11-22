@@ -6,8 +6,7 @@ import {
   useRef,
   useContext
 } from 'react';
-import { NetworkAddress } from 'assets/data';
-import notification from 'api/notification';
+import { useParams } from 'react-router-dom';
 
 
 interface Props {
@@ -74,7 +73,11 @@ const CameraContext = createContext<CameraContextProps>({
   disconnectSocket: () => { }
 });
 
+const IP = process.env.REACT_APP_IP;
+const PORT = process.env.REACT_APP_PORT;
+
 export const CameraProvider = ({ children }: Props) => {
+  const { cameraId } = useParams();
   const cameraRef = useRef<WebSocket | null>(null);
 
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -82,7 +85,7 @@ export const CameraProvider = ({ children }: Props) => {
   const [state, setState] = useState<boolean>(false);
 
   const [camera, setCamera] = useState<Camera>({
-    id: 'test',
+    id: cameraId || '',
     draw: false
   });
 
@@ -108,16 +111,12 @@ export const CameraProvider = ({ children }: Props) => {
       fall: 0
     });
 
-    setState(false);
-
     closeSocket();
   }
 
   useEffect(() => {
-    const ip = NetworkAddress.ip;
-    const port = NetworkAddress.port;
-
-    cameraRef.current = new WebSocket(`ws://${ip}:${port}/api/camera/${camera.id}?draw=${camera.draw}`);
+    cameraRef.current = new WebSocket(`ws://${IP}:${PORT}/ws/detection/${camera.id}?draw=${camera.draw}`);
+    
     cameraRef.current.binaryType = 'arraybuffer';
 
     cameraRef.current.onmessage = (event) => {
@@ -146,11 +145,13 @@ export const CameraProvider = ({ children }: Props) => {
     return () => closeSocket();
   }, [camera]);
 
-  useEffect(() => {
-    if (state) {
-      // notification.lineNotify();
-    }
-  }, [state]);
+  // useEffect(() => {
+  //   if (state) {
+  //     if (setting.notification){
+  //       notification.sendNotify(userState.value.token as string);
+  //     }
+  //   }
+  // }, [state, userState.value.token]);
 
 
   return (

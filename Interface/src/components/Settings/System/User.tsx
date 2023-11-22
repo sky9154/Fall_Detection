@@ -1,4 +1,4 @@
-import { FC, useState, useEffect } from 'react';
+import { FC, useState } from 'react';
 import { FaUserPlus, FaUserEdit, FaUserMinus } from 'react-icons/fa';
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
@@ -6,10 +6,13 @@ import Button from '@mui/material/Button';
 import Grid from '@mui/material/Unstable_Grid2';
 import { H2 } from 'components/Typography';
 import { Create, Edit, Remove } from 'components/Settings/System/UserFrom';
+import { useAuthContext } from 'context/AuthContext';
 import user from 'api/user';
 
 
 const User: FC = () => {
+  const { userState } = useAuthContext();
+
   const [fromState, setFromState] = useState<{
     create: boolean;
     edit: boolean;
@@ -22,10 +25,6 @@ const User: FC = () => {
 
   const [userList, setUserList] = useState<string[]>([]);
 
-  useEffect(() => {
-    user.getUserList(setUserList);
-  }, []);
-
   const handleOpen = (from: 'create' | 'edit' | 'remove') => {
     switch (from) {
       case 'create':
@@ -36,7 +35,7 @@ const User: FC = () => {
 
         break;
       case 'edit':
-        user.getUserList(setUserList);
+        user.getUserList(userState.value.token as string, setUserList);
 
         setFromState({
           ...fromState,
@@ -45,7 +44,7 @@ const User: FC = () => {
 
         break;
       case 'remove':
-        user.getUserList(setUserList);
+        user.getUserList(userState.value.token as string, setUserList);
 
         setFromState({
           ...fromState,

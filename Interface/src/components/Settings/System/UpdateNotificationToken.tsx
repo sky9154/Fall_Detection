@@ -8,12 +8,8 @@ import { H2 } from 'components/Typography';
 import SubmitButton from 'components/Settings/SubmitButton';
 import notification from 'api/notification';
 import check from 'functions/check';
+import { useAuthContext } from 'context/AuthContext';
 
-
-interface NotificationToken {
-  line: string;
-  discord: string;
-}
 
 interface Discord {
   channel: string;
@@ -21,6 +17,8 @@ interface Discord {
 }
 
 const UpdateNotificationToken: FC = () => {
+  const { userState } = useAuthContext();
+
   const [lineToken, setLineToken] = useState<string>('');
 
   const [discord, setDiscord] = useState<Discord>({
@@ -57,13 +55,13 @@ const UpdateNotificationToken: FC = () => {
     const discord: string | boolean = check.discord(discordChannel, discordToken);
     
     if (discord) {
-      await notification.update(line, discord as string);
+      notification.update(userState.value.token as string, line, discord as string);
     }
   }
 
   useEffect(() => {
-    notification.get(setLineToken, setDiscord);
-  }, []);
+    notification.get(userState.value.token as string, setLineToken, setDiscord);
+  }, [userState.value.token]);
 
   return (
     <Box

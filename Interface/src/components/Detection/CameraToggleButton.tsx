@@ -12,7 +12,7 @@ import Paper from '@mui/material/Paper';
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import { styled } from '@mui/material/styles';
-import { useCameraContext } from 'context/Home/CameraContext';
+import { useCameraContext } from 'context/CameraContext';
 
 
 const StyledToggleButtonGroup = styled(ToggleButtonGroup)(({ theme }) => ({
@@ -44,7 +44,7 @@ const CameraToggleButton: FC = () => {
   };
 
   const handleCamera = (event: MouseEvent<HTMLElement>, id: string) => {
-    if (id !== camera.value.id) {
+    if (id && id !== camera.value.id) {
       disconnectSocket();
 
       camera.setValue({

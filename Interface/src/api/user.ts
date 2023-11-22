@@ -1,7 +1,7 @@
 import toast from 'react-hot-toast';
 
 
-interface User {
+type UserType = {
   name: string | null;
   role: string | null;
   username: string | null;
@@ -10,17 +10,18 @@ interface User {
 
 const IP = process.env.REACT_APP_IP;
 const PORT = process.env.REACT_APP_PORT;
-const token = localStorage.getItem('access_token');
+
 
 /**
  * 使用者登入
  * @param navigate navigate
+ * @param setUser 設定使用者
  * @param username 帳號
  * @param password 密碼
  */
 const login = (
   navigate: (link: string) => void,
-  setUser: (user: User) => void,
+  setUser: (user: UserType) => void,
   username: string,
   password: string
 ) => {
@@ -71,8 +72,8 @@ const login = (
  */
 const updateName = (
   userState: {
-    value: User;
-    setValue: (user: User) => void;
+    value: UserType;
+    setValue: (user: UserType) => void;
   },
   name: string
 ) => {
@@ -108,8 +109,8 @@ const updateName = (
  */
 const updatePasswoed = (
   userState: {
-    value: User;
-    setValue: (user: User) => void;
+    value: UserType;
+    setValue: (user: UserType) => void;
   },
   password: {
     old: string,
@@ -141,46 +142,13 @@ const updatePasswoed = (
 
 
 /**
- * 取得使用者資料
- * @param setUser 設定使用者資料
- */
-const get = async (
-  setUser: (user: {
-    name: string,
-    role: string,
-    username: string
-  }) => void) => {
-  if (token) {
-    const url = `http://${IP}:${PORT}/api/user/get/token`;
-
-    const requestOptions = {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    };
-
-    fetch(url, requestOptions).then(async (response: Response) => {
-      if (response.ok) {
-        const json: User = await response.json();
-
-        setUser({
-          name: json.name as string,
-          role: json.role as string,
-          username: json.username as string
-        });
-      }
-    });
-  }
-}
-
-
-/**
  * 取得使用者
+ * @param token Token
  * @param username 帳號
  * @param set 設定使用者資料
  */
-const getUser = async (
+const getUser = (
+  token: string,
   username: string,
   set: {
     password: (password: string) => void,
@@ -216,9 +184,10 @@ const getUser = async (
 
 /**
  * 取得使用者清單
+ * @param token Token
  * @param setUserList 設定使用者清單
  */
-const getUserList = async (setUserList: (userList: string[]) => void) => {
+const getUserList = (token: string, setUserList: (userList: string[]) => void) => {
   const url = `http://${IP}:${PORT}/api/user/get/all`;
 
   const requestOptions = {
@@ -240,14 +209,18 @@ const getUserList = async (setUserList: (userList: string[]) => void) => {
 
 /**
  * 新增使用者
+ * @param token Token
  * @param user 使用者資料
  */
-const create = async (user: {
-  username: string,
-  password: string,
-  name: string,
-  role: string
-}) => {
+const create = (
+  token: string,
+  user: {
+    username: string,
+    password: string,
+    name: string,
+    role: string
+  }
+) => {
   const url = `http://${IP}:${PORT}/api/user/create`;
 
   const requestOptions = {
@@ -264,7 +237,7 @@ const create = async (user: {
     })
   }
 
-  fetch(url, requestOptions).then(async (response: Response) => {
+  fetch(url, requestOptions).then((response: Response) => {
     if (response.ok) {
       toast.success('新增成功!');
     }
@@ -274,14 +247,18 @@ const create = async (user: {
 
 /**
  * 修改使用者
+ * @param token Token
  * @param user 使用者資料
  */
-const edit = async (user: {
-  username: string,
-  password: string,
-  name: string,
-  role: string
-}) => {
+const edit = (
+  token: string,
+  user: {
+    username: string,
+    password: string,
+    name: string,
+    role: string
+  }
+) => {
   const url = `http://${IP}:${PORT}/api/user/edit`;
 
   const requestOptions = {
@@ -298,7 +275,7 @@ const edit = async (user: {
     })
   }
 
-  fetch(url, requestOptions).then(async (response: Response) => {
+  fetch(url, requestOptions).then((response: Response) => {
     if (response.ok) {
       toast.success('修改成功!');
     }
@@ -308,9 +285,10 @@ const edit = async (user: {
 
 /**
  * 刪除使用者
+ * @param token Token
  * @param username 帳號
  */
-const remove = async (username: string) => {
+const remove = (token: string, username: string) => {
   const url = `http://${IP}:${PORT}/api/user/delete`;
 
   const requestOptions = {
@@ -324,7 +302,7 @@ const remove = async (username: string) => {
     })
   }
 
-  fetch(url, requestOptions).then(async (response: Response) => {
+  fetch(url, requestOptions).then((response: Response) => {
     if (response.ok) {
       toast.success('刪除成功!');
     }
@@ -332,9 +310,8 @@ const remove = async (username: string) => {
 }
 
 
-const user = {
+const User = {
   login,
-  get,
   getUser,
   getUserList,
   updateName,
@@ -344,4 +321,4 @@ const user = {
   remove
 }
 
-export default user;
+export default User;
