@@ -110,13 +110,14 @@ async def stream (websocket: WebSocket, camera_id: str, draw: bool):
 
       results = pose.process(frame)
 
-      if draw:
-        mp_drawing.draw_landmarks(
-          frame,
-          results.pose_landmarks,
-          mp_pose.POSE_CONNECTIONS,
-          landmark_drawing_spec=mp_drawing_styles.get_default_pose_landmarks_style()
-        )
+      output = frame if draw else cv2.imread('temp/paper.png')
+
+      mp_drawing.draw_landmarks(
+        output,
+        results.pose_landmarks,
+        mp_pose.POSE_CONNECTIONS,
+        landmark_drawing_spec=mp_drawing_styles.get_default_pose_landmarks_style()
+      )
 
       pose_landmarks = results.pose_landmarks
       average_visibility = 0
@@ -151,7 +152,7 @@ async def stream (websocket: WebSocket, camera_id: str, draw: bool):
         state = False
 
 
-      success, buffer = cv2.imencode('.jpg', frame)
+      success, buffer = cv2.imencode('.jpg', output)
       frame = buffer.tobytes()
 
       await websocket.send_bytes(frame)

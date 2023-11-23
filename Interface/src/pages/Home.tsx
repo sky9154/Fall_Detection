@@ -37,7 +37,7 @@ const Home: FC = () => {
                 }}
               >
                 <Paper elevation={3}>
-                  <Box m={2}>
+                  <Box p={2}>
                     <H2>{device.name}</H2>
                     <Paragraph>{device.camera}</Paragraph>
                   </Box>

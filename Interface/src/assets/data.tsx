@@ -19,7 +19,7 @@ export const MenuList: {
 }[] = [
     {
       name: '跌倒檢測',
-      key: 'detection',
+      key: '',
       icon: <BiCamera />
     }, {
       name: '帳號管理',
