@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Form
+from fastapi import APIRouter, Depends, HTTPException, Form, UploadFile, File
 from fastapi.responses import JSONResponse, FileResponse
 from functions import token, user
 import os
@@ -32,7 +32,7 @@ async def get_token (token_payload: dict = Depends(token.get)):
 @router.get('/get/avatar/{username}')
 async def get_avatar (username: str):
   if user.check_username(username):
-    image = f'temp/avatar/{username}.png'
+    image = f'assets/images/avatar/{username}.png'
 
     if os.path.isfile(image):
       return FileResponse(image, media_type='image/jpeg')
@@ -109,6 +109,25 @@ async def update_password (
       raise HTTPException(201, 'Password updated successfully')
     else:
       raise HTTPException(400, 'Invalid password')
+  else:
+    raise HTTPException(404, 'User not found')
+
+
+@router.put('/update/avatar')
+async def update_avatar (
+  token_payload: dict = Depends(token.get),
+  image: UploadFile = File(default='')
+):
+  username = token_payload['username']
+  existence = await user.existence(username)
+
+  if existence:
+    image = await image.read()
+
+    with open(f'assets/images/avatar/{username}.png', 'wb') as buffer:
+      buffer.write(image)
+
+    raise HTTPException(201, 'Avatar updated successfully')
   else:
     raise HTTPException(404, 'User not found')
 

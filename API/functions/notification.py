@@ -77,7 +77,7 @@ async def line_notify (data: dict) -> Response:
     'message': message
   }
 
-  with open('temp/fall.png', 'rb') as image:
+  with open('assets/images/fall.png', 'rb') as image:
     response = requests.post(
       url,
       headers = headers,
@@ -110,7 +110,7 @@ async def discord_notify (data: dict) -> Response:
 
   webhook = DiscordWebhook(url=url)
 
-  with open('temp/fall.png', 'rb') as image:
+  with open('assets/images/fall.png', 'rb') as image:
     webhook.add_file(image.read(), 'fall.png')
 
   embed = DiscordEmbed(description=message, color=16769024)

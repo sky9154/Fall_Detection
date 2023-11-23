@@ -142,6 +142,42 @@ const updatePasswoed = (
 
 
 /**
+ * 修改頭像
+ * @param userState userState
+ * @param avater 頭像
+ */
+const updateAvatar = (
+  userState: {
+    value: UserType;
+    setValue: (user: UserType) => void;
+  },
+  avatar: File | null
+) => {
+  const url = `http://${IP}:${PORT}/api/user/update/avatar`;
+
+  if (avatar) {
+    const formData = new FormData();
+
+    formData.append('image', avatar as File);
+
+    const requestOptions = {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${userState.value.token}`
+      },
+      body: formData
+    };
+
+    fetch(url, requestOptions).then((response: Response) => {
+      if (response.ok) {
+        toast.success('更改成功!');
+      }
+    });
+  }
+}
+
+
+/**
  * 取得使用者
  * @param token Token
  * @param username 帳號
@@ -316,6 +352,7 @@ const User = {
   getUserList,
   updateName,
   updatePasswoed,
+  updateAvatar,
   create,
   edit,
   remove

@@ -110,7 +110,7 @@ async def stream (websocket: WebSocket, camera_id: str, draw: bool):
 
       results = pose.process(frame)
 
-      output = frame if draw else cv2.imread('temp/paper.png')
+      output = frame if draw else cv2.imread('assets/images/paper.png')
 
       mp_drawing.draw_landmarks(
         output,
@@ -142,7 +142,7 @@ async def stream (websocket: WebSocket, camera_id: str, draw: bool):
 
         print(f'INFO:     可信值: {average_visibility} %')
 
-        cv2.imwrite('temp/fall.png', frame)
+        cv2.imwrite('assets/images/fall.png', frame)
 
       if safety > 90:
         number += 1
