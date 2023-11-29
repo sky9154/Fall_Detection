@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 import numpy  as np
 import cv2
 import os
+from functions import device as Device
 
 
 load_dotenv()
@@ -41,7 +42,7 @@ async def process_image (frame):
   '''
   調整影像大小，並進行姿勢估計
   '''
-  
+
   height, width = frame.shape[:2]
   aspect_ratio = width / height
 
@@ -87,17 +88,19 @@ async def stream (websocket: WebSocket, camera_id: str, draw: bool):
       model_complexity=0
     )
 
-  match camera_id:
-    case 'demo1':
-      cap = cv2.VideoCapture('video/fall.mp4')
-    case 'demo2':
-      cap = cv2.VideoCapture('video/walk.mp4')
-    case 'esp32':
-      CAMERA_IP = os.getenv('CAMERA_IP')
+  device = await Device.get(camera_id)
+  device = device[0]
 
-      cap = cv2.VideoCapture(f'rtsp://{CAMERA_IP}/mjpeg/1')
-    case _:
-      cap = cv2.VideoCapture(int(camera_id))
+  if device['type'] == 'demo':
+    match device['camera']:
+      case 'demo1':
+        cap = cv2.VideoCapture('video/fall.mp4')
+      case 'demo2':
+        cap = cv2.VideoCapture('video/walk.mp4')
+  elif device['type'] == 'camera':
+    cap = cv2.VideoCapture(f'rtsp://{device["camera"]}/mjpeg/1')
+  else:
+    cap = cv2.VideoCapture(0)
 
   while True:
     try:
@@ -146,7 +149,7 @@ async def stream (websocket: WebSocket, camera_id: str, draw: bool):
 
       if safety > 90:
         number += 1
-    
+
       if number > 10:
         number = 0
         state = False
@@ -166,6 +169,5 @@ async def stream (websocket: WebSocket, camera_id: str, draw: bool):
       })
     except Exception as e:
       print(f'ERROR:    {e}')
-      
+
       break
-    

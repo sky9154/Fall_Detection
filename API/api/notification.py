@@ -26,7 +26,7 @@ async def update_notification_token (
   if user.check_role(user_role):
     line = line.strip()
     discord = discord.strip()
-  
+
     await notification.update_token(line, discord)
 
     raise HTTPException(201, 'Notification token updated successfully')

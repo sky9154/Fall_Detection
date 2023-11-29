@@ -7,5 +7,5 @@ router = APIRouter()
 @router.get('/get')
 async def get (token_payload: dict = Depends(token.get)):
   return {
-    'devices': await device.get()
+    'devices': await device.get_all()
   }
