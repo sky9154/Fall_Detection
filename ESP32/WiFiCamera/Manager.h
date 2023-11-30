@@ -12,14 +12,6 @@
 #define AP_HOSTNAME       "WiFiCamera"
 #define TRIGGER_PIN       0
 
-extern unsigned int       timeout;
-extern unsigned int       startTime;
-extern bool               portalRunning;
-extern bool               startAP;
-
-extern WebServer          webServer;
-extern WiFiManager        wifiManager;
-
 class Manager {
   public:
     void init();
