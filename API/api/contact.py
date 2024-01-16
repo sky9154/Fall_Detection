@@ -1,12 +1,13 @@
-from fastapi import APIRouter
-from fastapi.responses import JSONResponse
-from functions import contact
+from fastapi import APIRouter, Depends
+from functions import token, contact
 
 
 router = APIRouter()
 
 @router.get('/get')
-async def get ():
+async def get (token_payload: dict = Depends(token.get)):
   results = await contact.get()
 
-  return JSONResponse(content = results)
+  return {
+    'introduction_card': results
+  }

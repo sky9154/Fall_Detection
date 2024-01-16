@@ -7,6 +7,8 @@ import {
   useContext
 } from 'react';
 import { useParams } from 'react-router-dom';
+import Notification from 'api/notification';
+import { useAuthContext } from './AuthContext';
 
 
 interface Props {
@@ -33,6 +35,10 @@ interface CameraContextProps {
     value: Camera;
     setValue: (value: Camera) => void;
   };
+  notification: {
+    value: boolean;
+    setValue: (value: boolean) => void;
+  }
   cameraFrame: {
     value: string;
     setValue: (value: string) => void;
@@ -53,8 +59,12 @@ const CameraContext = createContext<CameraContextProps>({
   camera: {
     value: {
       id: '0',
-      draw: false
+      draw: true
     },
+    setValue: () => { }
+  },
+  notification: {
+    value: false,
     setValue: () => { }
   },
   cameraFrame: {
@@ -77,16 +87,17 @@ const IP = process.env.REACT_APP_IP;
 const PORT = process.env.REACT_APP_PORT;
 
 export const CameraProvider = ({ children }: Props) => {
+  const { userState } = useAuthContext();
   const { cameraId } = useParams();
   const cameraRef = useRef<WebSocket | null>(null);
 
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [cameraFrame, setCameraFrame] = useState<string>('https://dummyimage.com/1280x720/FFF.png&text=+');
   const [state, setState] = useState<boolean>(false);
-
+  const [notification, setNotification] = useState<boolean>(false);
   const [camera, setCamera] = useState<Camera>({
     id: cameraId || '',
-    draw: false
+    draw: true
   });
 
   const [predict, setPredict] = useState<Predict>({
@@ -116,7 +127,7 @@ export const CameraProvider = ({ children }: Props) => {
 
   useEffect(() => {
     cameraRef.current = new WebSocket(`ws://${IP}:${PORT}/ws/detection/${camera.id}?draw=${camera.draw}`);
-    
+
     cameraRef.current.binaryType = 'arraybuffer';
 
     cameraRef.current.onmessage = (event) => {
@@ -145,13 +156,11 @@ export const CameraProvider = ({ children }: Props) => {
     return () => closeSocket();
   }, [camera]);
 
-  // useEffect(() => {
-  //   if (state) {
-  //     if (setting.notification){
-  //       notification.sendNotify(userState.value.token as string);
-  //     }
-  //   }
-  // }, [state, userState.value.token]);
+  useEffect(() => {
+    if (state && notification) {
+      Notification.sendNotify(userState.value.token as string);
+    }
+  }, [notification, state, userState.value.token]);
 
 
   return (
@@ -163,6 +172,10 @@ export const CameraProvider = ({ children }: Props) => {
       camera: {
         value: camera,
         setValue: setCamera
+      },
+      notification: {
+        value: notification,
+        setValue: setNotification
       },
       cameraFrame: {
         value: cameraFrame,

@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Form
 from fastapi.responses import JSONResponse
-from functions import token, notification, user, sensor
+from functions import token, notification, user, device
 
 
 router = APIRouter()
@@ -9,7 +9,7 @@ router = APIRouter()
 async def get_token (token_payload: dict = Depends(token.get)):
   result = await notification.get_token()
 
-  return JSONResponse(content = { 
+  return JSONResponse(content = {
     'line': result['line'],
     'discord': result['discord']
   })
@@ -36,17 +36,17 @@ async def update_notification_token (
 
 @router.post('/send')
 async def send (token_payload: dict = Depends(token.get)):
-  result = await sensor.get()
+  result = await device.get_environment()
 
   data = {
     'temperature': result['temperature'],
-    'mq5': {
-      'data': result['mq5'],
-      'state': '正常' if result['mq5'] <= 7.5 else '危險'
+    'gas': {
+      'data': result['gas'],
+      'state': '正常' if float(result['gas'].split(' ')[0]) <= 7.5 else '危險'
     },
-    'mq9': {
-      'data': result['mq9'],
-      'state': '正常' if result['mq9'] <= 7.5 else '危險'
+    'co': {
+      'data': result['co'],
+      'state': '正常' if float(result['co'].split(' ')[0]) <= 7.5 else '危險'
     }
   }
 

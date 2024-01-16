@@ -92,11 +92,7 @@ async def stream (websocket: WebSocket, camera_id: str, draw: bool):
   device = device[0]
 
   if device['type'] == 'demo':
-    match device['camera']:
-      case 'demo1':
-        cap = cv2.VideoCapture('video/fall.mp4')
-      case 'demo2':
-        cap = cv2.VideoCapture('video/walk.mp4')
+    cap = cv2.VideoCapture(f'video/{device["camera"]}')
   elif device['type'] == 'camera':
     cap = cv2.VideoCapture(f'rtsp://{device["camera"]}/mjpeg/1')
   else:

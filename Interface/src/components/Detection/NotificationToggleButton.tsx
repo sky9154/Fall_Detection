@@ -1,7 +1,7 @@
 import { FC, MouseEvent } from 'react';
 import {
-  IoAccessibilityOutline,
-  IoAccessibility
+  IoNotificationsOutline,
+  IoNotificationsOffSharp
 } from 'react-icons/io5';
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
@@ -25,16 +25,11 @@ const StyledToggleButtonGroup = styled(ToggleButtonGroup)(({ theme }) => ({
   }
 }));
 
-const CameraToggleButton: FC = () => {
-  const { isLoading, camera, disconnectSocket } = useCameraContext();
+const NotificationToggleButton: FC = () => {
+  const { isLoading, notification } = useCameraContext();
 
   const handleDrawState = (event: MouseEvent<HTMLElement>, draw: boolean) => {
-    disconnectSocket();
-
-    camera.setValue({
-      ...camera.value,
-      draw: !camera.value.draw
-    });
+    notification.setValue(!notification.value);
   };
 
   return (
@@ -47,13 +42,13 @@ const CameraToggleButton: FC = () => {
     >
       <ToggleButton
         value="check"
-        selected={camera.value.draw}
+        selected={!notification.value}
         aria-label="state"
       >
-        {(camera.value.draw) ? <IoAccessibility /> : <IoAccessibilityOutline />}
+        {(!notification.value) ? <IoNotificationsOffSharp /> : <IoNotificationsOutline />}
       </ToggleButton>
     </StyledToggleButtonGroup>
   );
 }
 
-export default CameraToggleButton;
+export default NotificationToggleButton;

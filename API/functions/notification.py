@@ -31,17 +31,17 @@ async def update_token (line: str, discord: str):
   修改 Notification Token
   '''
 
-  await mongodb.update('Notification', { 
-    'class': 'line' 
-  }, { 
+  await mongodb.update('Notification', {
+    'class': 'line'
+  }, {
     '$set': {
       'token': line
     }
   })
 
-  await mongodb.update('Notification', { 
-    'class': 'discord' 
-  }, { 
+  await mongodb.update('Notification', {
+    'class': 'discord'
+  }, {
     '$set': {
       'token': discord
     }
@@ -63,9 +63,9 @@ async def line_notify (data: dict) -> Response:
   message += f'\n{now.strftime("%Y/%m/%d %H:%M:%S")}'
   message += f'\n可能發生跌倒!'
   message += f'\n\n當前環境\n{"-" * 20}'
-  message += f'\n溫度:\n{data["temperature"]} °C'
-  message += f'\n瓦斯:\n{data["mq5"]["data"]} %  ({data["mq5"]["state"]})'
-  message += f'\n一氧化碳:\n{data["mq9"]["data"]} %  ({data["mq9"]["state"]})'
+  message += f'\n溫度:\n{data["temperature"]}'
+  message += f'\n瓦斯:\n{data["gas"]["data"]}  ({data["gas"]["state"]})'
+  message += f'\n一氧化碳:\n{data["co"]["data"]}  ({data["co"]["state"]})'
 
   url = 'https://notify-api.line.me/api/notify'
 
@@ -116,17 +116,17 @@ async def discord_notify (data: dict) -> Response:
   embed = DiscordEmbed(description=message, color=16769024)
   embed.add_embed_field(
     '溫度：',
-    f'{data["temperature"]} °C',
+    data['temperature'],
     False
   )
   embed.add_embed_field(
     '瓦斯：',
-    f'{data["mq5"]["data"]} %  ({data["mq5"]["state"]})',
+    f'{data["gas"]["data"]}  ({data["gas"]["state"]})',
     True
   )
   embed.add_embed_field(
     '一氧化碳：',
-    f'{data["mq9"]["data"]} %  ({data["mq9"]["state"]})',
+    f'{data["co"]["data"]}  ({data["co"]["state"]})',
     True
   )
   embed.set_image(url='attachment://fall.png')

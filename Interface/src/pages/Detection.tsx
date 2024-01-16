@@ -1,14 +1,19 @@
-import { FC } from 'react';
+import { FC, useState } from 'react';
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Grid from '@mui/material/Unstable_Grid2';
 import CameraScreen from 'components/Detection/CameraScreen';
 import CameraToggleButton from 'components/Detection/CameraToggleButton';
+import NotificationToggleButton from 'components/Detection/NotificationToggleButton';
 import PredictChart from 'components/Detection/PredictChart';
 import StateNotification from 'components/Detection/StateNotification';
+import OperationToggleButton from 'components/Detection/OperationToggleButton';
+import IntroductionCard from 'components/Detection/IntroductionCard';
 
 
 const Detection: FC = () => {
+  const [page, setPage] = useState<number>(1);
+
   return (
     <Box m={4}>
       <Grid
@@ -29,12 +34,10 @@ const Detection: FC = () => {
             <Box
               p={4}
               width="100%"
-              sx={{
-                borderRadius: { xl: 4 },
-                boxShadow: { xl: '0 4px 8px 0 #BDC9D7' }
-              }}
+              borderRadius={4}
+              boxShadow="0 4px 8px 0 #BDC9D7"
             >
-              <Stack
+               <Stack
                 direction="column"
                 justifyContent="space-between"
                 alignItems="center"
@@ -42,15 +45,24 @@ const Detection: FC = () => {
                 height="100%"
                 width="100%"
               >
-                <Box width="100%">
-                  <StateNotification />
-                </Box>
-                <Box height="100%" width="100%" minHeight="200px">
-                  <PredictChart />
-                </Box>
-                <Box width="auto">
+                {(page === 1) ? (
+                  <>
+                    <Box width="100%">
+                      <StateNotification />
+                    </Box>
+                    <Box height="100%" width="100%" minHeight="200px">
+                      <PredictChart />
+                    </Box>
+                  </>
+                ) : (
+                  <IntroductionCard />
+                )}
+                <Stack direction="row">
                   <CameraToggleButton />
-                </Box>
+		  <NotificationToggleButton />
+
+                  <OperationToggleButton page={page} setPage={setPage} />
+                </Stack>
               </Stack>
             </Box>
           </Box>
