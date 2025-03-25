@@ -24,7 +24,7 @@
 
 ![人體骨架關節點](https://i.imgur.com/KBdJsGU.png)
 
-保留了 13 個重要點位當作訓練的特徵值，其中保留了鼻子、肩膀、手肘、手腕、臀圍、膝蓋及腳踝的關節點。 
+保留了 13 個重要點位當作訓練的特徵值，其中保留了鼻子、肩膀、手肘、手腕、臀圍、膝蓋及腳踝的關節點。
 
 ![範例 骨架](https://i.imgur.com/a7CoV9y.png)
 
@@ -83,7 +83,7 @@ $Y^{}_{r} = Y^{}_{n} - Y^{}_{dis}$
 [相關程式碼](../Train/tools/linear_interpolation.py)
 
 ## 模型訓練
-[訓練過程](lstm_model.ipynb)
+[訓練過程](../Train/tools/lstm_model.ipynb)
 
 ### 設備資訊
 | GPU | CPU |
