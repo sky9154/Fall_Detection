@@ -9,9 +9,14 @@ import os
 folder = os.path.join(input('DATASET: '), 'images')
 os.chdir(folder)
 
+WIDTH = 1280
+HEIGHT = 720
+XC = WIDTH / 2
+YC = HEIGHT / 2
+
 mp_pose = solutions.pose
 pose = mp_pose.Pose(
-  min_detection_confidence=0.5, 
+  min_detection_confidence=0.5,
   min_tracking_confidence=0.5
 )
 
@@ -26,10 +31,10 @@ def create_csv ():
 
       writer.writerow(np.concatenate([
         ['frame', 'labels'],
-        [f'x{i}' for i in range(1, 14)], 
+        [f'x{i}' for i in range(1, 14)],
         [f'y{i}' for i in range(1, 14)]
       ]))
-  
+
 
 def extract_keypoints (results):
   '''
@@ -40,17 +45,30 @@ def extract_keypoints (results):
 
   indices = [0] + list(range(11, 17)) + list(range(23, 29))
 
-  pose_x = [landmarks[i].x * 1280 for i in indices]
-  pose_y = [landmarks[i].y * 720 for i in indices]
+  pose_x = [landmarks[i].x * WIDTH for i in indices]
+  pose_y = [landmarks[i].y * HEIGHT for i in indices]
 
   return np.concatenate([pose_x, pose_y])
+
+def dis_keypoints (keypoints):
+  '''
+  固定特徵點
+  '''
+
+  bm_x, bm_y = [(keypoints[7] + keypoints[8]) / 2, (keypoints[20] + keypoints[21]) / 2]
+  dis_x, dis_y = [bm_x - XC, bm_y - YC]
+
+  return np.concatenate([
+    [keypoints[x] - dis_x for x in range(0, 13)],
+    [keypoints[y] - dis_y for y in range(13, 26)]
+  ])
 
 
 def write_csv ():
   '''
   寫入特徵點
   '''
-  
+
   for data in ['0', '1', '2']:
     for index, image in enumerate(os.listdir(data), start=1):
       frame = cv2.imread(os.path.join(data, image))
@@ -69,7 +87,7 @@ def write_csv ():
       else:
         new_frame = frame
 
-      new_frame = cv2.resize(new_frame, (1280, 720), interpolation = cv2.INTER_AREA)
+      new_frame = cv2.resize(new_frame, (WIDTH, HEIGHT), interpolation = cv2.INTER_AREA)
 
       results = pose.process(cv2.cvtColor(new_frame, cv2.COLOR_BGR2RGB))
 
@@ -77,7 +95,7 @@ def write_csv ():
         keypoints = extract_keypoints(results.pose_landmarks)
       else:
         continue
-    
+
       with open(f'{data}.csv', 'a+', newline='') as csvfile:
         writer = csv.writer(csvfile)
 
@@ -86,7 +104,7 @@ def write_csv ():
 
         # name = image.split('_')
         # name = f'{name[0]}-{name[2]}'
-        
+
         content = np.concatenate([[name.split('.')[0], data], keypoints])
 
         writer.writerow(content)
